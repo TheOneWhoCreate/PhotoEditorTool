@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Editor</title>
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
+</head>
+
+<body>
+    <div id="main-menu">
+        <h2>Photo Editor</h2>
+
+        <div class="form-group">
+            <label>Select Photos</label>
+            <input type="file" id="fileInput" multiple accept="image/*">
+        </div>
+
+        <div class="dimension-grid">
+            <div class="form-group">
+                <label>Save Format</label>
+                <select id="format">
+                    <option value="image/webp">WebP</option>
+                    <option value="image/jpeg">JPEG</option>
+                    <option value="image/png">PNG</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Effect</label>
+                <select id="effect">
+                    <option value="none">Standard</option>
+                    <option value="padSlider">Padded Image</option>
+                    <option value="polaroid">Polaroid</option>
+                    <option value="border">Border</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="dimension-grid">
+            <div class="form-group">
+                <label>Width (px)</label>
+                <input type="number" id="manualWidth" placeholder="Auto">
+            </div>
+            <div class="form-group">
+                <label>Height (px)</label>
+                <input type="number" id="manualHeight" placeholder="Auto">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Frame/Background Color
+                <span id="color-disclaimer"
+                    style="color: #d93025; font-size: 0.8rem; margin-left: 10px; display: none;">
+                    * White works best for Polaroid
+                </span>
+            </label>
+            <input type="color" id="frameColor" value="#ffffff">
+        </div>
+
+        <label>Polaroid Caption (Optional)</label>
+        <input type="text" id="polaroidText" placeholder="e.g. Example Caption">
+
+        <div class="checkbox-container">
+            <input type="checkbox" id="manualCropCheck">
+            <label for="manualCropCheck" style="margin:0; cursor:pointer; flex-grow:1;">
+                Manual Crop
+            </label>
+        </div>
+
+        <button onclick="startProcess()">Start Processing</button>
+        <div id="status"></div>
+    </div>
+
+
+
+    <div id="cropper-ui">
+        <h2 id="crop-counter">Photo 1 of 1</h2>
+        <p>Adjust your crop below. The selected effect will be applied automatically upon saving.</p>
+
+        <div class="crop-container">
+            <img id="crop-image" src="" alt="To Crop">
+        </div>
+
+        <button onclick="saveCropAndNext()">Save & Next</button>
+        <button class="btn-skip" onclick="skipAndNext()">Skip this photo</button>
+        <button class="btn-secondary" onclick="cancelCropping()">Cancel / Go Back</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
