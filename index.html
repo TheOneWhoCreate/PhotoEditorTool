@@ -34,6 +34,8 @@
                     <option value="none">Standard</option>
                     <option value="padSlider">Padded Image</option>
                     <option value="polaroid">Polaroid</option>
+                    <option value="vintage">Vintage Film</option>
+                    <option value="blurBg">Blur Background</option>
                     <option value="border">Border</option>
                 </select>
             </div>
@@ -50,18 +52,25 @@
             </div>
         </div>
 
-        <div class="form-group">
-            <label>Frame/Background Color
+        <div class="form-group" id="color-pad-group">
+            <label>
+                Frame/Background Color
                 <span id="color-disclaimer"
                     style="color: #d93025; font-size: 0.8rem; margin-left: 10px; display: none;">
                     * White works best for Polaroid
                 </span>
             </label>
-            <input type="color" id="frameColor" value="#ffffff">
+
+            <div class="color-pad-row">
+                <input type="color" id="frameColor" value="#ffffff">
+
+                <!-- Padding (hidden by default) -->
+                <input type="number" id="paddingInput" placeholder="Padding px" style="display:none;">
+            </div>
         </div>
 
         <label>Polaroid Caption (Optional)</label>
-        <input type="text" id="polaroidText" placeholder="e.g. Example Caption">
+        <input type="text" id="polaroidText" placeholder="">
 
         <div class="checkbox-container">
             <input type="checkbox" id="manualCropCheck">

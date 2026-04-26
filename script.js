@@ -130,14 +130,12 @@ async function applyEffectAndDownload(sourceImg, effect, format, originalName) {
 
     const userColor = document.getElementById('frameColor').value;
 
-    // Get manual dimensions
+    // Manual dimensions
     const mWidth = parseInt(document.getElementById('manualWidth').value);
     const mHeight = parseInt(document.getElementById('manualHeight').value);
 
     let imgW, imgH;
 
-    // Logic: If BOTH Width and Height are provided, use them. 
-    // Otherwise, use the default auto-scaling logic.
     if (!isNaN(mWidth) && !isNaN(mHeight)) {
         imgW = mWidth;
         imgH = mHeight;
@@ -149,49 +147,71 @@ async function applyEffectAndDownload(sourceImg, effect, format, originalName) {
         imgH = sourceImg.height * scale;
     }
 
+    // 🔥 Padding (safe + clamped)
+    let userPadding = parseInt(document.getElementById('paddingInput')?.value);
+    if (isNaN(userPadding)) userPadding = 20;
+
+    let maxPad = Math.min(imgW, imgH) * 0.4;
+    userPadding = Math.max(0, Math.min(userPadding, maxPad));
+
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
 
+    /* =========================
+       PAD SLIDER
+    ========================= */
     if (effect === 'padSlider') {
-        let boxWidth = (!isNaN(mWidth)) ? mWidth : 800;
-        let boxHeight = (!isNaN(mHeight)) ? mHeight : 600;
-
-        let fitScale = Math.min(boxWidth / sourceImg.width, boxHeight / sourceImg.height);
-        let fitW = sourceImg.width * fitScale;
-        let fitH = sourceImg.height * fitScale;
+        let boxWidth = imgW + userPadding * 2;
+        let boxHeight = imgH + userPadding * 2;
 
         canvas.width = boxWidth;
         canvas.height = boxHeight;
+
         ctx.fillStyle = userColor;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        let dx = (boxWidth - fitW) / 2;
-        let dy = (boxHeight - fitH) / 2;
-        ctx.drawImage(sourceImg, dx, dy, fitW, fitH);
+        ctx.drawImage(sourceImg, userPadding, userPadding, imgW, imgH);
     }
 
+    /* =========================
+       POLAROID (UPGRADED)
+    ========================= */
     else if (effect === 'polaroid') {
-        let pad = 10, bottomPad = 70;
+        let pad = userPadding;
+        let bottomPad = Math.max(userPadding * 3, 80);
+
+        let desiredWidth = imgW + (pad * 2);
+        let desiredHeight = imgH + pad + bottomPad;
+
+        // 🔥 Safe scaling
+        let MAX_CANVAS = 2000;
+        let scale = Math.min(1, MAX_CANVAS / desiredWidth, MAX_CANVAS / desiredHeight);
+
+        pad *= scale;
+        bottomPad *= scale;
+        imgW *= scale;
+        imgH *= scale;
+
         canvas.width = imgW + (pad * 2);
         canvas.height = imgH + pad + bottomPad;
 
-        // STEP 1: Draw the main background frame
+        // Frame
         ctx.fillStyle = userColor;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // STEP 2: Draw the inner shadow (for depth)
-        ctx.shadowColor = "rgba(0,0,0,0.3)"; // Slightly darker for better visibility
-        ctx.shadowBlur = 10;
-        ctx.shadowOffsetX = 5;
-        ctx.shadowOffsetY = 0;
-        ctx.strokeRect(pad, pad, imgW, imgH);
+        // Shadow
+        ctx.shadowColor = "rgba(0,0,0,0.25)";
+        ctx.shadowBlur = 15 * scale;
+        ctx.shadowOffsetY = 6 * scale;
 
-        // STEP 3: Draw the image
-        ctx.shadowBlur = 10;
-        ctx.shadowOffsetY = 5;
         ctx.drawImage(sourceImg, pad, pad, imgW, imgH);
 
-        // STEP 4: Dynamic Label (Brightness check)
+        // Reset shadow
+        ctx.shadowColor = "transparent";
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetY = 0;
+
+        // Text
         const isDark = (color) => {
             const hex = color.replace('#', '');
             const r = parseInt(hex.substr(0, 2), 16);
@@ -201,25 +221,94 @@ async function applyEffectAndDownload(sourceImg, effect, format, originalName) {
         };
 
         const label = document.getElementById('polaroidText').value;
+
         if (label) {
             ctx.fillStyle = isDark(userColor) ? "#ffffff" : "#333333";
-            ctx.font = "30px 'Brush Script MT', sans-serif";
             ctx.textAlign = "center";
-            // Calculate the middle point of the bottomPad area
-            const textY = (canvas.height - bottomPad) + (bottomPad / 2);
-            ctx.fillText(label, canvas.width / 2, textY + 10); // +10 to adjust for vertical centering
+            ctx.textBaseline = "middle";
+
+            const textY = canvas.height - (bottomPad / 2);
+            const maxWidth = canvas.width * 0.9;
+
+            let fontSize = Math.max(16 * scale, Math.min(bottomPad * 0.35, 60));
+
+            do {
+                ctx.font = `${fontSize}px 'Segoe Script', cursive`;
+                fontSize--;
+            } while (ctx.measureText(label).width > maxWidth && fontSize > 12 * scale);
+
+            ctx.fillText(label, canvas.width / 2, textY);
         }
     }
 
+    /* =========================
+       BORDER
+    ========================= */
     else if (effect === 'border') {
-        let pad = 10;
+        let pad = userPadding;
+
         canvas.width = imgW + (pad * 2);
         canvas.height = imgH + (pad * 2);
+
         ctx.fillStyle = userColor;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+
         ctx.drawImage(sourceImg, pad, pad, imgW, imgH);
     }
 
+    /* =========================
+       VINTAGE
+    ========================= */
+    else if (effect === 'vintage') {
+        canvas.width = imgW;
+        canvas.height = imgH;
+
+        ctx.drawImage(sourceImg, 0, 0, imgW, imgH);
+
+        let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        let data = imageData.data;
+
+        for (let i = 0; i < data.length; i += 4) {
+            let r = data[i];
+            let g = data[i + 1];
+            let b = data[i + 2];
+
+            data[i] = (0.393 * r + 0.769 * g + 0.189 * b);
+            data[i + 1] = (0.349 * r + 0.686 * g + 0.168 * b);
+            data[i + 2] = (0.272 * r + 0.534 * g + 0.131 * b);
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+    }
+
+    /* =========================
+       BLUR BACKGROUND
+    ========================= */
+    else if (effect === 'blurBg') {
+        let boxWidth = 800;
+        let boxHeight = 600;
+
+        canvas.width = boxWidth;
+        canvas.height = boxHeight;
+
+        ctx.filter = "blur(20px)";
+        ctx.drawImage(sourceImg, 0, 0, boxWidth, boxHeight);
+
+        ctx.filter = "none";
+
+        let scale = Math.min(boxWidth / sourceImg.width, boxHeight / sourceImg.height);
+        let w = sourceImg.width * scale;
+        let h = sourceImg.height * scale;
+
+        let dx = (boxWidth - w) / 2;
+        let dy = (boxHeight - h) / 2;
+
+        ctx.drawImage(sourceImg, dx, dy, w, h);
+    }
+
+    /* =========================
+       DEFAULT
+    ========================= */
     else {
         canvas.width = imgW;
         canvas.height = imgH;
@@ -233,6 +322,15 @@ async function applyEffectAndDownload(sourceImg, effect, format, originalName) {
         link.click();
     }, format, 0.85);
 }
+
+document.querySelectorAll("input, select").forEach(el => {
+    el.addEventListener("focus", () => {
+        el.style.transform = "scale(1.02)";
+    });
+    el.addEventListener("blur", () => {
+        el.style.transform = "scale(1)";
+    });
+});
 
 function loadImage(file) {
     return new Promise((resolve) => {
@@ -250,12 +348,34 @@ function loadImage(file) {
 function toggleDisclaimer() {
     const effect = document.getElementById('effect').value;
     const disclaimer = document.getElementById('color-disclaimer');
+    const paddingInput = document.getElementById('paddingInput');
+    const polaroidText = document.getElementById('polaroidText');
 
+    // 🔹 POLAROID
     if (effect === 'polaroid') {
-        disclaimer.style.display = 'inline';
-    } else {
-        disclaimer.style.display = 'none';
+        disclaimer.style.display = 'block';
+        paddingInput.style.display = 'block';
+
+        polaroidText.placeholder = "Enter caption...";
     }
+
+    // 🔹 BORDER
+    else if (effect === 'border') {
+        disclaimer.style.display = 'none';
+        paddingInput.style.display = 'block';
+
+        polaroidText.placeholder = "Caption not used in border";
+    }
+
+    // 🔹 ALL OTHER EFFECTS
+    else {
+        disclaimer.style.display = 'none';
+        paddingInput.style.display = 'none';
+
+        polaroidText.placeholder = "Only for polaroid effect";
+    }
+
+    polaroidText.disabled = (effect !== 'polaroid');
 }
 
 // Add the event listener to the dropdown
