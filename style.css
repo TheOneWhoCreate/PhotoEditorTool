@@ -1,3 +1,6 @@
+/* ==========================================================================
+   1. VARIABLES & RESET
+   ========================================================================== */
 :root {
   --primary: #0066cc;
   --primary-hover: #0052a3;
@@ -14,25 +17,31 @@ body {
     -apple-system,
     sans-serif;
   background-color: var(--bg);
+  /* Decorative gradient background */
+  background: linear-gradient(135deg, #e3f2fd, #fce4ec);
   max-width: 600px;
   margin: 40px auto;
   padding: 0 20px;
   color: var(--text);
   line-height: 1.5;
-  background: linear-gradient(135deg, #e3f2fd, #fce4ec);
 }
 
+/* ==========================================================================
+   2. LAYOUT CONTAINERS (Glassmorphism Effect)
+   ========================================================================== */
 #main-menu,
 #cropper-ui {
   padding: 30px;
   border-radius: 12px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
   box-sizing: border-box;
+  /* Semi-transparent blur effect */
   backdrop-filter: blur(12px);
   background: rgba(255, 255, 255, 0.75);
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
+/* Animation for the main menu entrance */
 #main-menu {
   animation: fadeSlide 0.6s ease;
 }
@@ -56,12 +65,15 @@ h2 {
   color: #1a1a1a;
 }
 
+/* ==========================================================================
+   3. FORM ELEMENTS
+   ========================================================================== */
 .form-group {
   margin-bottom: 18px;
 }
 
 label {
-  display: flex; /* Changed from block to flex */
+  display: flex;
   align-items: center;
   justify-content: flex-start;
   font-weight: 600;
@@ -70,9 +82,10 @@ label {
   color: #555;
 }
 
-/* Updated Inputs */
+/* Standard Input Styling */
 input[type="file"],
 input[type="number"],
+input[type="text"],
 select {
   width: 100%;
   padding: 12px;
@@ -89,10 +102,11 @@ select:focus {
   border-color: var(--primary);
 }
 
+/* Custom Color Picker Styling */
 input[type="color"] {
   height: 45px;
   cursor: pointer;
-  padding: 4px; /* Gives the color swatch some breathing room */
+  padding: 4px;
   background: #fff;
   border: 1.5px solid var(--border);
   border-radius: 8px;
@@ -105,7 +119,7 @@ input[type="color"]:hover {
   background: #f0f7ff;
 }
 
-/* This makes the actual color block inside look better in Chrome/Edge */
+/* Inner color swatch for Webkit browsers */
 input[type="color"]::-webkit-color-swatch-wrapper {
   padding: 0;
 }
@@ -114,13 +128,14 @@ input[type="color"]::-webkit-color-swatch {
   border-radius: 4px;
 }
 
-/* NEW: Layout for side-by-side inputs */
+/* Side-by-side Layout (e.g., Width/Height) */
 .dimension-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
 }
 
+/* Custom Checkbox Group */
 .checkbox-container {
   display: flex;
   align-items: center;
@@ -138,10 +153,9 @@ input[type="color"]::-webkit-color-swatch {
   background: #f0f2f5;
 }
 
-/* This makes sure clicking the label or the area around it works */
 .checkbox-container label {
   cursor: pointer;
-  user-select: none; /* Prevents text highlighting when clicking fast */
+  user-select: none;
   margin-bottom: 0;
   display: block;
   width: 100%;
@@ -153,7 +167,9 @@ input[type="color"]::-webkit-color-swatch {
   height: 18px;
 }
 
-/* Button Styling */
+/* ==========================================================================
+   4. BUTTONS
+   ========================================================================== */
 button {
   width: 100%;
   padding: 14px;
@@ -166,7 +182,8 @@ button {
   cursor: pointer;
   transition:
     transform 0.1s,
-    background 0.2s;
+    background 0.2s,
+    box-shadow 0.2s;
   margin-top: 15px;
   margin-bottom: 10px;
 }
@@ -177,9 +194,10 @@ button:active {
 
 button:hover {
   background: var(--primary-hover);
-  box-shadow: 0 0 15px rgba(0, 102, 204, 0.5);
+  box-shadow: 0 0 15px rgba(0, 102, 204, 0.4);
 }
 
+/* Button Variants */
 .btn-secondary {
   background: #6c757d;
 }
@@ -194,16 +212,11 @@ button:hover {
   background: #c82333;
 }
 
-#status {
-  margin-top: 15px;
-  font-weight: bold;
-  color: var(--primary);
-  text-align: center;
-}
-
-/* Cropper UI Styles */
+/* ==========================================================================
+   5. IMAGE CROPPER & STATUS UI
+   ========================================================================== */
 #cropper-ui {
-  display: none;
+  display: none; /* Controlled via JS */
 }
 
 .crop-container {
@@ -221,6 +234,7 @@ img {
   max-width: 100%;
 }
 
+/* Inline row for Padding + Color Picker */
 .color-pad-row {
   display: flex;
   gap: 10px;
@@ -232,10 +246,64 @@ img {
   padding: 10px;
   border: 1.5px solid var(--border);
   border-radius: 8px;
-  transition: all 0.2s ease;
 }
 
 #paddingInput:focus {
   border-color: var(--primary);
   box-shadow: 0 0 8px rgba(0, 102, 204, 0.3);
+}
+
+#status {
+  margin-top: 15px;
+  font-weight: bold;
+  color: var(--primary);
+  text-align: center;
+}
+
+/* Smooth transitions for conditional inputs */
+#paddingInput,
+#polaroidText,
+#caption,
+#color-disclaimer {
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+}
+
+/* Enhancing the Polaroid caption input */
+#polaroidText {
+  margin-top: 10px;
+  border-style: dashed; /* Visual cue that it's for the "handwritten" part */
+}
+
+/* Styling for the Instructions block */
+.instructions {
+  margin-top: 25px;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 10px;
+  border-left: 4px solid var(--primary);
+}
+
+.instructions h3 {
+  font-size: 0.95rem;
+  margin-bottom: 10px;
+  text-align: left;
+  border: none;
+  color: var(--primary);
+}
+
+.instructions ul {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.instructions li {
+  margin-bottom: 8px;
+}
+
+.instructions li strong {
+  color: #333;
 }
