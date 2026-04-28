@@ -5,6 +5,12 @@ console.log("Script loaded successfully.");
 let currentFiles = [];
 let currentIndex = 0;
 let cropperInstance = null;
+let previewTimeout;
+
+function triggerPreview() {
+    clearTimeout(previewTimeout);
+    previewTimeout = setTimeout(updatePreview, 150);
+}
 
 // Entry point: Decides between Manual Crop or Bulk Auto mode
 async function startProcess() {
@@ -156,34 +162,8 @@ async function runBulkProcess(files) {
     }
 }
 
-/* ==========================================================================
-   CORE EFFECT ENGINE
-   ========================================================================== */
 
-async function applyEffectAndDownload(sourceImg, effect, format, originalName) {
-    let ext = format.split('/')[1] === 'jpeg' ? 'jpg' : format.split('/')[1];
-    const userColor = document.getElementById('frameColor').value;
-    const mWidth = parseInt(document.getElementById('manualWidth').value);
-    const mHeight = parseInt(document.getElementById('manualHeight').value);
-
-    // 1. Calculate base dimensions
-    let imgW, imgH;
-    if (!isNaN(mWidth) && !isNaN(mHeight)) {
-        imgW = mWidth;
-        imgH = mHeight;
-    } else {
-        const maxBounds = 1000;
-        let scale = Math.min(maxBounds / sourceImg.width, maxBounds / sourceImg.height, 1);
-        imgW = sourceImg.width * scale;
-        imgH = sourceImg.height * scale;
-    }
-
-    // 2. Safe Padding Calculation
-    let userPadding = parseInt(document.getElementById('paddingInput')?.value) || 20;
-    let maxPad = Math.min(imgW, imgH) * 0.4;
-    userPadding = Math.max(0, Math.min(userPadding, maxPad));
-
-    const canvas = document.createElement('canvas');
+async function drawEffectToCanvas(canvas, sourceImg, effect, userPadding, userColor, imgW, imgH, label) {
     const ctx = canvas.getContext('2d');
 
     // EFFECTS
@@ -234,7 +214,7 @@ async function applyEffectAndDownload(sourceImg, effect, format, originalName) {
 
         // 4. Text Caption
         ctx.shadowColor = "transparent";
-        const label = document.getElementById('polaroidText').value;
+
         if (label) {
             const isDark = (c) => {
                 const hex = c.replace('#', '');
@@ -360,6 +340,45 @@ async function applyEffectAndDownload(sourceImg, effect, format, originalName) {
         canvas.width = imgW; canvas.height = imgH;
         ctx.drawImage(sourceImg, 0, 0, imgW, imgH);
     }
+}
+
+/* ==========================================================================
+   CORE EFFECT ENGINE
+   ========================================================================== */
+
+async function applyEffectAndDownload(sourceImg, effect, format, originalName) {
+    let ext = format.split('/')[1] === 'jpeg' ? 'jpg' : format.split('/')[1];
+    const userColor = document.getElementById('frameColor').value;
+    const mWidth = parseInt(document.getElementById('manualWidth').value);
+    const mHeight = parseInt(document.getElementById('manualHeight').value);
+    const label = document.getElementById('polaroidText').value;
+
+    // 1. Calculate base dimensions
+    let imgW, imgH;
+    if (!isNaN(mWidth) && !isNaN(mHeight)) {
+        imgW = mWidth;
+        imgH = mHeight;
+    } else {
+        const maxBounds = 1000;
+        let scale = Math.min(maxBounds / sourceImg.width, maxBounds / sourceImg.height, 1);
+        imgW = sourceImg.width * scale;
+        imgH = sourceImg.height * scale;
+    }
+
+    // 2. Safe Padding Calculation
+    let userPadding = parseInt(document.getElementById('paddingInput')?.value);
+
+    if (isNaN(userPadding)) {
+        userPadding = 20;
+    }
+
+    let maxPad = Math.min(imgW, imgH) * 0.4;
+    userPadding = Math.max(0, Math.min(userPadding, maxPad));
+
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    await drawEffectToCanvas(canvas, sourceImg, effect, userPadding, userColor, imgW, imgH, label);
 
     // 3. Trigger Download
     const quality = format === "image/png" ? undefined : 0.85;
@@ -377,7 +396,7 @@ async function applyEffectAndDownload(sourceImg, effect, format, originalName) {
 }
 
 /* ==========================================================================
-   UTILITIES & EVENT LISTENERS
+   UTILITIES
    ========================================================================== */
 
 function loadImage(file) {
@@ -392,10 +411,19 @@ function loadImage(file) {
     });
 }
 
-function toggleEvents() {
+document.querySelectorAll("input, select").forEach(el => {
+    el.addEventListener("focus", () => el.style.transform = "scale(1.02)");
+    el.addEventListener("blur", () => el.style.transform = "scale(1)");
+});
+
+/* ==========================================================================
+   EVENT LISTENERS
+   ========================================================================== */
+
+function effectChanges() {
     const effect = document.getElementById('effect').value;
     const paddingInput = document.getElementById('paddingInput');
-    const colorPicker = document.getElementById('frameColor'); // Reference for Polaroid reset
+    const colorPicker = document.getElementById('frameColor');
 
     const isPol = effect === 'polaroid';
     const isBord = effect === 'border';
@@ -415,15 +443,77 @@ function toggleEvents() {
     } else {
         paddingInput.value = 0;
     }
+
 }
 
-// UI Interactions
-document.getElementById('effect').addEventListener('change', toggleEvents);
+function purposeChanges() {
+    const purpose = document.getElementById('purpose').value;
+    const manualCropCheck = document.getElementById('manualCropCheck');
 
-document.querySelectorAll("input, select").forEach(el => {
-    el.addEventListener("focus", () => el.style.transform = "scale(1.02)");
-    el.addEventListener("blur", () => el.style.transform = "scale(1)");
-});
+    if (purpose.includes('insta')) {
+        manualCropCheck.checked = true;
+        manualCropCheck.disabled = true;
+        manualCropCheck.parentElement.style.border = "1.5px solid var(--primary)";
+    } else {
+        manualCropCheck.checked = false;
+        manualCropCheck.disabled = false;
+        manualCropCheck.parentElement.style.border = "1px solid #eee";
+    }
+}
+
+
+async function updatePreview() {
+    const fileInput = document.getElementById('fileInput');
+    if (fileInput.files.length === 0) return;
+
+    const previewCanvas = document.getElementById('previewCanvas');
+
+    // Load image
+    const img = await loadImage(fileInput.files[0]);
+
+    // Settings (same as main pipeline)
+    const effect = document.getElementById('effect').value;
+    const userColor = document.getElementById('frameColor').value;
+
+    const val = document.getElementById('paddingInput')?.value;
+    let userPadding = val === "" ? 20 : parseInt(val);
+
+    const label = document.getElementById('polaroidText').value;
+
+    // Scale for preview (IMPORTANT for performance)
+    const maxPreview = 400;
+    let scale = Math.min(maxPreview / img.width, maxPreview / img.height);
+
+    let imgW = img.width * scale;
+    let imgH = img.height * scale;
+
+    // Apply real effect logic
+    await drawEffectToCanvas(
+        previewCanvas,
+        img,
+        effect,
+        userPadding,
+        userColor,
+        imgW,
+        imgH,
+        label
+    );
+}
+
+// --- Event Listeners Hub ---
+const effectDrop = document.getElementById('effect');
+const purposeDrop = document.getElementById('purpose');
+
+if (effectDrop) effectDrop.addEventListener('change', effectChanges);
+if (purposeDrop) purposeDrop.addEventListener('change', purposeChanges);
+
+// --- Event Listeners for Live Preview ---
+document.getElementById('fileInput').addEventListener('change', triggerPreview);
+document.getElementById('effect').addEventListener('change', triggerPreview);
+document.getElementById('frameColor').addEventListener('input', triggerPreview);
+document.getElementById('paddingInput').addEventListener('input', triggerPreview);
+document.getElementById('polaroidText').addEventListener('input', triggerPreview);
 
 // Initialization
-toggleEvents();
+effectChanges();
+purposeChanges();

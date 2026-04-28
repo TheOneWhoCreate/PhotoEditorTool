@@ -19,7 +19,7 @@
             <input type="file" id="fileInput" multiple accept="image/*">
         </div>
 
-        <div class="form-group">
+        <div class="form-group" id="purpose-params">
             <label>Posting To:</label>
             <select id="purpose">
                 <option value="custom">Custom (Use Manual Inputs)</option>
@@ -55,12 +55,12 @@
 
         <div class="dimension-grid" id="dimension-params">
             <div class="form-group">
-                <label>Width (px)</label>
-                <input type="number" id="manualWidth" placeholder="Auto" min="1">
+                <label>Width (Optional)</label>
+                <input type="number" id="manualWidth" placeholder="Auto (Pixels)" min="1">
             </div>
             <div class="form-group">
-                <label>Height (px)</label>
-                <input type="number" id="manualHeight" placeholder="Auto" min="1">
+                <label>Height (Optional)</label>
+                <input type="number" id="manualHeight" placeholder="Auto (Pixels)" min="1">
             </div>
         </div>
 
@@ -94,15 +94,23 @@
             </label>
         </div>
 
+        <div id="preview-section" style="margin-bottom: 20px; text-align: center;">
+            <label style="justify-content: center;">Live Preview</label>
+
+            <div class="preview-box">
+                <canvas id="previewCanvas"></canvas>
+            </div>
+        </div>
+
         <button onclick="startProcess()">Start Processing</button>
 
         <div class="instructions">
             <h3>Quick Guide</h3>
             <ul>
-                <li><strong>Bulk Mode:</strong> Applies selected effect to all photos instantly.</li>
                 <li><strong>Manual Crop:</strong> Lets you adjust the frame for each photo.</li>
                 <li><strong>Insta Tip:</strong> For the best feed result, use <strong>4:5</strong> ratio.</li>
                 <li><strong>Format:</strong> WebP is recommended for high quality at small file sizes.</li>
+                <li><strong>Effects:</strong> Apply effects easily and in one click.</li>
             </ul>
         </div>
 
