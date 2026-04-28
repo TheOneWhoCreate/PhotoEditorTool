@@ -318,6 +318,7 @@ img {
   justify-content: center;
   overflow: hidden;
   border: 1px dashed #444;
+  padding: 5px; 
 }
 
 #previewCanvas {
