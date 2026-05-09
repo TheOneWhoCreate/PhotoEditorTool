@@ -7,6 +7,7 @@ let currentIndex = 0;
 let cropperInstance = null;
 let previewTimeout;
 
+
 function triggerPreview() {
     clearTimeout(previewTimeout);
     previewTimeout = setTimeout(updatePreview, 150);
@@ -17,13 +18,19 @@ async function startProcess() {
     const fileInput = document.getElementById('fileInput');
     const isManualCrop = document.getElementById('manualCropCheck').checked;
     const statusText = document.getElementById('status');
+    const purpose = document.getElementById('purpose').value;
 
     if (fileInput.files.length === 0) {
         statusText.innerText = "Please select some photos first!";
         return;
     }
 
-    if (isManualCrop) {
+    if (purpose === "passport") {
+        statusText.innerText = "Processing passport photos...";
+        await runPassportProcess(fileInput.files);
+        statusText.innerText = "Passport PDF ready!";
+    }
+    else if (isManualCrop) {
         currentFiles = Array.from(fileInput.files);
         currentIndex = 0;
         document.getElementById('main-menu').style.display = 'none';
@@ -62,8 +69,8 @@ function loadNextCropper() {
 
     if (purpose === 'insta-feed (3:4)') targetRatio = 3 / 4;
     if (purpose === 'insta-feed (4:5)') targetRatio = 4 / 5;
-    if (purpose === 'insta-story') targetRatio = 9 / 16;
     if (purpose === 'insta-square') targetRatio = 1 / 1;
+    if (purpose === 'passport') targetRatio = 35 / 45;
 
     imageEl.onload = () => {
         cropperInstance = new Cropper(imageEl, {
@@ -87,14 +94,15 @@ async function saveCropAndNext() {
 
     // High quality crop capture
     const croppedCanvas = cropperInstance.getCroppedCanvas({ maxWidth: 1500, maxHeight: 1500 });
-    const effect = document.getElementById('effect').value;
+    const filter = document.getElementById('filter').value;
+    const frame = document.getElementById('frame').value;
     const format = document.getElementById('format').value;
     const file = currentFiles[currentIndex];
 
     // Extract filename without extension
     let originalName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
 
-    await applyEffectAndDownload(croppedCanvas, effect, format, originalName);
+    await applyEffectAndDownload(croppedCanvas, filter, frame, format, originalName);
 
     currentIndex++;
     loadNextCropper();
@@ -144,7 +152,8 @@ function finishCropping(customMessage = "All photos processed and saved.") {
    ========================================================================== */
 
 async function runBulkProcess(files) {
-    const effect = document.getElementById('effect').value;
+    const filter = document.getElementById('filter').value;
+    const frame = document.getElementById('frame').value;
     const format = document.getElementById('format').value;
 
     for (let i = 0; i < files.length; i++) {
@@ -154,7 +163,7 @@ async function runBulkProcess(files) {
         document.getElementById('status').innerText = `Processing ${i + 1} of ${files.length}...`;
 
         const img = await loadImage(file);
-        await applyEffectAndDownload(img, effect, format, originalName);
+        await applyEffectAndDownload(img, filter, frame, format, originalName);
 
         img.src = "";
         // Throttle downloads slightly to help browser stability
@@ -162,20 +171,220 @@ async function runBulkProcess(files) {
     }
 }
 
+async function runPassportProcess(files) {
+    const images = [];
 
-async function drawEffectToCanvas(canvas, sourceImg, effect, userPadding, userColor, imgW, imgH, label) {
+    for (let i = 0; i < files.length; i++) {
+        const img = await loadImage(files[i]);
+
+        // Create canvas
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Passport standard size (pixel scaled)
+        const w = 350;
+        const h = 450;
+
+        canvas.width = w;
+        canvas.height = h;
+
+        // White background
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, w, h);
+
+        // Fit image inside
+        const scale = Math.min(w / img.width, h / img.height);
+        const iw = img.width * scale;
+        const ih = img.height * scale;
+
+        ctx.drawImage(img, (w - iw) / 2, (h - ih) / 2, iw, ih);
+
+        images.push(canvas.toDataURL("image/jpeg"));
+    }
+
+    generatePassportPDF(images);
+}
+
+function generatePassportPDF(images) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    const imgW = 35; // mm
+    const imgH = 45; // mm
+
+    const pageW = 210;
+    const pageH = 297;
+
+    const cols = Math.floor(pageW / imgW);
+    const rows = Math.floor(pageH / imgH);
+
+    let index = 0;
+
+    for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+            if (index >= images.length) break;
+
+            doc.addImage(
+                images[index],
+                "JPEG",
+                c * imgW,
+                r * imgH,
+                imgW,
+                imgH
+            );
+
+            index++;
+        }
+    }
+
+    doc.save("passport_photos.pdf");
+}
+
+/* ==========================================================================
+   EFFECTS
+   ========================================================================== */
+
+async function drawEffectToCanvas(canvas, sourceImg, filter, frame, userPadding, userColor, imgW, imgH, label) {
     const ctx = canvas.getContext('2d');
 
-    // EFFECTS
-    if (effect === 'border') {
+    const filterCanvas = document.createElement('canvas');
+    filterCanvas.width = imgW;
+    filterCanvas.height = imgH;
+    const fCtx = filterCanvas.getContext('2d');
+    fCtx.drawImage(sourceImg, 0, 0, imgW, imgH);
+
+    // FILTERS (fCtx for frames)
+    if (filter === 'vintage') {
+        let idata = fCtx.getImageData(0, 0, imgW, imgH);
+        let d = idata.data;
+        for (let i = 0; i < d.length; i += 4) {
+            let r = d[i], g = d[i + 1], b = d[i + 2];
+            d[i] = (r * 0.393) + (g * 0.769) + (b * 0.189);
+            d[i + 1] = (r * 0.349) + (g * 0.686) + (b * 0.168);
+            d[i + 2] = (r * 0.272) + (g * 0.534) + (b * 0.131);
+        }
+        fCtx.putImageData(idata, 0, 0);
+    }
+
+    if (filter === 'goldenHour') {
+        fCtx.filter = "saturate(1.3) brightness(1.05) contrast(1.1)";
+        fCtx.drawImage(filterCanvas, 0, 0);
+        fCtx.filter = "none";
+
+        const gradient = fCtx.createRadialGradient(imgW, 0, imgW * 0.1, imgW * 0.8, imgH * 0.2, imgW);
+        gradient.addColorStop(0, "rgba(255, 165, 0, 0.25)");
+        gradient.addColorStop(0.5, "rgba(255, 69, 0, 0.1)");
+        gradient.addColorStop(1, "transparent");
+
+        fCtx.globalCompositeOperation = "overlay";
+        fCtx.fillStyle = gradient;
+        fCtx.fillRect(0, 0, imgW, imgH);
+        fCtx.globalCompositeOperation = "source-over";
+    }
+
+    if (filter === 'noir') {
+        let idata = fCtx.getImageData(0, 0, imgW, imgH);
+        let d = idata.data;
+        for (let i = 0; i < d.length; i += 4) {
+            // Weighted grayscale for better human perception
+            let avg = 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2];
+
+            // Increase contrast: push darks darker and lights lighter
+            avg = ((avg - 128) * 1.3) + 128;
+
+            d[i] = d[i + 1] = d[i + 2] = avg;
+        }
+        fCtx.putImageData(idata, 0, 0);
+    }
+
+    if (filter === 'lomo') {
+        // 1. Boost Saturation and Contrast using CSS Filters
+        fCtx.filter = "saturate(1.8) contrast(1.2)";
+        fCtx.drawImage(filterCanvas, 0, 0);
+        fCtx.filter = "none";
+
+        // 2. Add Vignette (dark edges)
+        const vignette = fCtx.createRadialGradient(
+            imgW / 2, imgH / 2, imgW * 0.2, // Inner circle
+            imgW / 2, imgH / 2, imgW * 0.8  // Outer circle
+        );
+        vignette.addColorStop(0, "transparent");
+        vignette.addColorStop(1, "rgba(0, 0, 0, 0.7)");
+
+        fCtx.fillStyle = vignette;
+        fCtx.fillRect(0, 0, imgW, imgH);
+    }
+
+    if (filter === 'coldbrew') {
+        fCtx.filter = "brightness(1.05) contrast(0.9) saturate(0.8) hue-rotate(10deg)";
+        fCtx.drawImage(filterCanvas, 0, 0);
+        fCtx.filter = "none";
+
+        // Layer a very subtle navy blue tint
+        fCtx.globalCompositeOperation = "soft-light";
+        fCtx.fillStyle = "rgba(0, 50, 100, 0.2)";
+        fCtx.fillRect(0, 0, imgW, imgH);
+        fCtx.globalCompositeOperation = "source-over";
+    }
+
+    if (filter === 'dreamy') {
+
+        // Warm cinematic tone
+        fCtx.globalCompositeOperation = "soft-light";
+        fCtx.fillStyle = "rgba(255,210,180,0.22)";
+        fCtx.fillRect(0, 0, imgW, imgH);
+
+        fCtx.globalCompositeOperation = "source-over";
+
+        // Soft glow
+        fCtx.save();
+
+        fCtx.globalAlpha = 0.22;
+        fCtx.filter = "blur(12px) brightness(1.08)";
+
+        fCtx.drawImage(filterCanvas, 0, 0);
+
+        fCtx.restore();
+
+        fCtx.filter = "none";
+
+        // Tiny sparkles
+        for (let i = 0; i < 300; i++) {
+
+            let x = Math.random() * imgW;
+            let y = Math.random() * imgH;
+
+            if (
+                x > imgW * 0.35 &&
+                x < imgW * 0.65 &&
+                y > imgH * 0.2 &&
+                y < imgH * 0.7
+            ) continue;
+
+            let r = Math.random() * 1.8;
+
+            fCtx.beginPath();
+            fCtx.arc(x, y, r, 0, Math.PI * 2);
+
+            fCtx.fillStyle = "rgba(255,255,255,0.7)";
+            fCtx.fill();
+        }
+    }
+
+    canvas.width = imgW;
+    canvas.height = imgH;
+    ctx.drawImage(filterCanvas, 0, 0, imgW, imgH);
+
+    //FRAMES (ctx for frames)
+    if (frame === 'border') {
         canvas.width = imgW + userPadding * 2;
         canvas.height = imgH + userPadding * 2;
         ctx.fillStyle = userColor;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(sourceImg, userPadding, userPadding, imgW, imgH);
+        ctx.drawImage(filterCanvas, userPadding, userPadding, imgW, imgH);
     }
 
-    else if (effect === 'polaroid') {
+    else if (frame === 'polaroid') {
         let pad = userPadding;
         let bottomPad = Math.max(userPadding * 3, 80);
 
@@ -209,7 +418,7 @@ async function drawEffectToCanvas(canvas, sourceImg, effect, userPadding, userCo
         ctx.shadowColor = "rgba(0,0,0,0.2)";
         ctx.shadowBlur = 15 * scale;
         ctx.shadowOffsetY = 5 * scale;
-        ctx.drawImage(sourceImg, pad, pad, imgW, imgH);
+        ctx.drawImage(filterCanvas, pad, pad, imgW, imgH);
         ctx.restore();
 
         // 4. Text Caption
@@ -238,32 +447,66 @@ async function drawEffectToCanvas(canvas, sourceImg, effect, userPadding, userCo
         }
     }
 
-    else if (effect === 'vintage') {
+    else if (frame === 'filmStrip') {
+        const barHeight = imgH * 0.15;
         canvas.width = imgW;
-        canvas.height = imgH;
-        ctx.drawImage(sourceImg, 0, 0, imgW, imgH);
-        let idata = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        let d = idata.data;
-        for (let i = 0; i < d.length; i += 4) {
-            let r = d[i], g = d[i + 1], b = d[i + 2];
-            d[i] = (r * 0.393) + (g * 0.769) + (b * 0.189);
-            d[i + 1] = (r * 0.349) + (g * 0.686) + (b * 0.168);
-            d[i + 2] = (r * 0.272) + (g * 0.534) + (b * 0.131);
+        canvas.height = imgH + (barHeight * 2);
+
+        // 1. Draw black background bars
+        ctx.fillStyle = "#111";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // 2. Draw the filtered image in the center
+        ctx.drawImage(filterCanvas, 0, barHeight, imgW, imgH);
+
+        // 3. Draw sprocket holes
+        ctx.fillStyle = "#fff";
+        const holeW = imgW * 0.02;
+        const holeH = holeW * 1.5;
+        const gap = holeW * 2;
+
+        for (let x = gap; x < canvas.width; x += (holeW + gap)) {
+            // Top holes
+            ctx.fillRect(x, barHeight / 2 - holeH / 2, holeW, holeH);
+            // Bottom holes
+            ctx.fillRect(x, canvas.height - (barHeight / 2) - (holeH / 2), holeW, holeH);
         }
-        ctx.putImageData(idata, 0, 0);
     }
 
-    else if (effect === 'blurBg') {
+    else if (frame === 'gallery') {
+        const margin = imgW * 0.1;
+        const innerGap = 5; // Space between image and mat
+
+        canvas.width = imgW + (margin * 2);
+        canvas.height = imgH + (margin * 2);
+
+        // 1. Outer Frame (User selected color)
+        ctx.fillStyle = userColor;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // 2. Inner White Mat
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(margin - innerGap, margin - innerGap, imgW + (innerGap * 2), imgH + (innerGap * 2));
+
+        // 3. Image Shadow
+        ctx.save();
+        ctx.shadowColor = "rgba(0,0,0,0.3)";
+        ctx.shadowBlur = 20;
+        ctx.drawImage(filterCanvas, margin, margin, imgW, imgH);
+        ctx.restore();
+    }
+
+    else if (frame === 'blurBg') {
         canvas.width = 800; canvas.height = 600;
         ctx.filter = "blur(20px)";
-        ctx.drawImage(sourceImg, 0, 0, 800, 600);
+        ctx.drawImage(filterCanvas, 0, 0, 800, 600);
         ctx.filter = "none";
-        let s = Math.min(800 / sourceImg.width, 600 / sourceImg.height);
-        let w = sourceImg.width * s, h = sourceImg.height * s;
-        ctx.drawImage(sourceImg, (800 - w) / 2, (600 - h) / 2, w, h);
+        let s = Math.min(800 / filterCanvas.width, 600 / filterCanvas.height);
+        let w = filterCanvas.width * s, h = filterCanvas.height * s;
+        ctx.drawImage(filterCanvas, (800 - w) / 2, (600 - h) / 2, w, h);
     }
 
-    else if (effect === 'glassFrame') {
+    else if (frame === 'glassFrame') {
         let margin = imgW * 0.12;
         canvas.width = imgW + (margin * 2);
         canvas.height = imgH + (margin * 2);
@@ -271,7 +514,7 @@ async function drawEffectToCanvas(canvas, sourceImg, effect, userPadding, userCo
         // 1. Background (Blurred & Scaled)
         ctx.save();
         ctx.filter = "blur(30px) brightness(0.85)";
-        ctx.drawImage(sourceImg, -20, -20, canvas.width + 40, canvas.height + 40);
+        ctx.drawImage(filterCanvas, -20, -20, canvas.width + 40, canvas.height + 40);
         ctx.restore();
 
         // 2. The "Frosted" Overlay
@@ -302,51 +545,17 @@ async function drawEffectToCanvas(canvas, sourceImg, effect, userPadding, userCo
 
         // Draw Image
         ctx.shadowColor = "transparent"; // Turn off shadow specifically for the image to keep edges crisp
-        ctx.drawImage(sourceImg, margin, margin, imgW, imgH);
+        ctx.drawImage(filterCanvas, margin, margin, imgW, imgH);
 
         ctx.restore();
-    }
-
-    else if (effect === 'goldenHour') {
-        canvas.width = imgW;
-        canvas.height = imgH;
-
-        // 1. Draw the original image first
-        ctx.drawImage(sourceImg, 0, 0, imgW, imgH);
-
-        // 2. Add a warm saturation and brightness boost
-        ctx.filter = "saturate(1.3) brightness(1.05) contrast(1.1)";
-        ctx.drawImage(canvas, 0, 0);
-        ctx.filter = "none";
-
-        // 3. Create a "Sun" Gradient
-        // We create a radial gradient starting from the top-right corner
-        const gradient = ctx.createRadialGradient(imgW, 0, imgW * 0.1, imgW * 0.8, imgH * 0.2, imgW);
-        gradient.addColorStop(0, "rgba(255, 165, 0, 0.25)"); // Warm Orange
-        gradient.addColorStop(0.5, "rgba(255, 69, 0, 0.1)");  // Reddish Tint
-        gradient.addColorStop(1, "transparent");
-
-        // 4. Blend the gradient
-        ctx.globalCompositeOperation = "overlay";
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, imgW, imgH);
-
-        // Reset composite operation for future drawing
-        ctx.globalCompositeOperation = "source-over";
-    }
-
-    // DEFAULT EFFECT
-    else {
-        canvas.width = imgW; canvas.height = imgH;
-        ctx.drawImage(sourceImg, 0, 0, imgW, imgH);
     }
 }
 
 /* ==========================================================================
-   CORE EFFECT ENGINE
+   CORE ENGINE
    ========================================================================== */
 
-async function applyEffectAndDownload(sourceImg, effect, format, originalName) {
+async function applyEffectAndDownload(sourceImg, filter, frame, format, originalName) {
     let ext = format.split('/')[1] === 'jpeg' ? 'jpg' : format.split('/')[1];
     const userColor = document.getElementById('frameColor').value;
     const mWidth = parseInt(document.getElementById('manualWidth').value);
@@ -378,7 +587,7 @@ async function applyEffectAndDownload(sourceImg, effect, format, originalName) {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
 
-    await drawEffectToCanvas(canvas, sourceImg, effect, userPadding, userColor, imgW, imgH, label);
+    await drawEffectToCanvas(canvas, sourceImg, filter, frame, userPadding, userColor, imgW, imgH, label);
 
     // 3. Trigger Download
     const quality = format === "image/png" ? undefined : 0.85;
@@ -421,16 +630,20 @@ document.querySelectorAll("input, select").forEach(el => {
    ========================================================================== */
 
 function effectChanges() {
-    const effect = document.getElementById('effect').value;
+    const filter = document.getElementById('filter').value;
+    const frame = document.getElementById('frame').value;
     const paddingInput = document.getElementById('paddingInput');
     const colorPicker = document.getElementById('frameColor');
+    const colorLabel = document.getElementById('colorlabel');
 
-    const isPol = effect === 'polaroid';
-    const isBord = effect === 'border';
+    const isPol = frame === 'polaroid';
+    const isBord = frame === 'border';
+    const isMusi = frame === 'gallery';
 
     // 1. UI Visibility Logic
     document.getElementById('color-disclaimer').style.display = isPol ? 'block' : 'none';
     paddingInput.style.display = (isPol || isBord) ? 'block' : 'none';
+    colorPicker.style.display = (isPol || isMusi) ? 'block' : 'none';
     document.getElementById('polaroidText').style.display = isPol ? 'block' : 'none';
     document.getElementById('caption').style.display = isPol ? 'block' : 'none';
 
@@ -442,6 +655,12 @@ function effectChanges() {
         paddingInput.value = 2;
     } else {
         paddingInput.value = 0;
+    }
+
+    if (isPol || isMusi || isBord) {
+        colorLabel.classList.remove('hidden');
+    } else {
+        colorLabel.classList.add('hidden');
     }
 
 }
@@ -461,8 +680,9 @@ function purposeChanges() {
     }
 }
 
-
 async function updatePreview() {
+    const filter = document.getElementById('filter').value;
+    const frame = document.getElementById('frame').value;
     const fileInput = document.getElementById('fileInput');
     if (fileInput.files.length === 0) return;
 
@@ -471,8 +691,7 @@ async function updatePreview() {
     // Load image
     const img = await loadImage(fileInput.files[0]);
 
-    // Settings (same as main pipeline)
-    const effect = document.getElementById('effect').value;
+    // Settings
     const userColor = document.getElementById('frameColor').value;
 
     const val = document.getElementById('paddingInput')?.value;
@@ -491,7 +710,8 @@ async function updatePreview() {
     await drawEffectToCanvas(
         previewCanvas,
         img,
-        effect,
+        filter,
+        frame,
         userPadding,
         userColor,
         imgW,
@@ -501,15 +721,18 @@ async function updatePreview() {
 }
 
 // --- Event Listeners Hub ---
-const effectDrop = document.getElementById('effect');
+const filterDrop = document.getElementById('filter');
+const frameDrop = document.getElementById('frame');
 const purposeDrop = document.getElementById('purpose');
 
-if (effectDrop) effectDrop.addEventListener('change', effectChanges);
+if (filterDrop) filterDrop.addEventListener('change', effectChanges);
+if (frameDrop) frameDrop.addEventListener('change', effectChanges);
 if (purposeDrop) purposeDrop.addEventListener('change', purposeChanges);
 
 // --- Event Listeners for Live Preview ---
 document.getElementById('fileInput').addEventListener('change', triggerPreview);
-document.getElementById('effect').addEventListener('change', triggerPreview);
+document.getElementById('filter').addEventListener('change', triggerPreview);
+document.getElementById('frame').addEventListener('change', triggerPreview);
 document.getElementById('frameColor').addEventListener('input', triggerPreview);
 document.getElementById('paddingInput').addEventListener('input', triggerPreview);
 document.getElementById('polaroidText').addEventListener('input', triggerPreview);

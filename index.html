@@ -7,6 +7,7 @@
     <title>Photo Editor</title>
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link href="style.css" rel="stylesheet">
 </head>
 
@@ -19,18 +20,17 @@
             <input type="file" id="fileInput" multiple accept="image/*">
         </div>
 
-        <div class="form-group" id="purpose-params">
-            <label>Posting To:</label>
-            <select id="purpose">
-                <option value="custom">Custom (Use Manual Inputs)</option>
-                <option value="insta-feed (3:4)">Instagram Feed (3:4)</option>
-                <option value="insta-feed (4:5)">Instagram Feed (4:5)</option>
-                <option value="insta-story">Instagram Story (9:16)</option>
-                <option value="insta-square">Instagram Square (1:1)</option>
-            </select>
-        </div>
-
-        <div class="dimension-grid" id="format-effect-params">
+        <div class="dimension-grid" id="purpose-format-params">
+            <div class="form-group">
+                <label>Posting To:</label>
+                <select id="purpose">
+                    <option value="custom">Custom (Use Manual Inputs)</option>
+                    <option value="passport">Passport Photo</option>
+                    <option value="insta-feed (3:4)">Instagram Feed (3:4)</option>
+                    <option value="insta-feed (4:5)">Instagram Feed (4:5)</option>
+                    <option value="insta-square">Instagram Square (1:1)</option>
+                </select>
+            </div>
             <div class="form-group">
                 <label>Save Format</label>
                 <select id="format">
@@ -39,14 +39,29 @@
                     <option value="image/png">PNG</option>
                 </select>
             </div>
+        </div>
+
+        <div class="dimension-grid" id="effect-params">
             <div class="form-group">
-                <label>Effect</label>
-                <select id="effect">
-                    <option value="none">Standard</option>
+                <label>Filter (Color)</label>
+                <select id="filter">
+                    <option value="none">None</option>
                     <option value="goldenHour">Golden Hour</option>
-                    <option value="polaroid">Polaroid</option>
                     <option value="vintage">Vintage Film</option>
+                    <option value="noir">Noir</option>
+                    <option value="lomo">Lomo</option>
+                    <option value="coldbrew">Cold Brew</option>
+                    <option value="dreamy">Dreamy Aesthetic</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Frame (Layout)</label>
+                <select id="frame">
+                    <option value="none">None</option>
+                    <option value="polaroid">Polaroid</option>
                     <option value="glassFrame">Glass Morphism</option>
+                    <option value="filmStrip">Film Strip</option>
+                    <option value="gallery">Museum Gallery</option>
                     <option value="blurBg">Blur Background</option>
                     <option value="border">Border</option>
                 </select>
@@ -65,16 +80,16 @@
         </div>
 
         <div class="form-group" id="color-pad-params">
-            <label>
+            <div id="colorlabel">
                 Frame/Background Color
                 <span id="color-disclaimer"
                     style="color: #d93025; font-size: 0.8rem; margin-left: 10px; display: none;">
                     * White works best for Polaroid
                 </span>
-            </label>
+            </div>
 
             <div class="color-pad-row">
-                <input type="color" id="frameColor" value="#ffffff">
+                <input type="color" id="frameColor" value="#ffffff" style="display:none;">
 
                 <!-- Padding (hidden by default) -->
                 <input type="number" id="paddingInput" placeholder="Padding px" style="display:none;">

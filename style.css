@@ -140,7 +140,7 @@ input[type="color"]::-webkit-color-swatch {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin: 20px 0;
+  margin: 10px 0;
   padding: 12px;
   background: #f8f9fa;
   border: 1px solid #eee;
@@ -309,7 +309,6 @@ img {
 }
 
 .preview-box {
-  width: 100%;
   height: 400px;
   background: #f0f0f0; /* better contrast */
   border-radius: 10px;
@@ -318,11 +317,25 @@ img {
   justify-content: center;
   overflow: hidden;
   border: 1px dashed #444;
-  padding: 5px; 
+  padding: 5px;
 }
 
 #previewCanvas {
   max-width: 100%;
   max-height: 100%;
   border-radius: 6px;
+}
+
+#colorlabel {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  font-weight: 600;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.hidden {
+  display: none !important;
 }
