@@ -308,6 +308,17 @@ img {
   color: #333;
 }
 
+.instructions em {
+  color: #888;
+  font-size: 0.8rem;
+  display: block;
+  margin-top: 2px;
+}
+
+.combos-list li {
+  margin-bottom: 10px;
+}
+
 .preview-box {
   height: 400px;
   background: #f0f0f0; /* better contrast */

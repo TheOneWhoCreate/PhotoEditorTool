@@ -5,12 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Photo Editor</title>
- <meta name="google-site-verification" content="HFdHX7Q4Y6E8mt4UqFaT8tnUZDCw8ZJZ40tHVPgFV7s" />
+    <meta name="google-site-verification" content="HFdHX7Q4Y6E8mt4UqFaT8tnUZDCw8ZJZ40tHVPgFV7s" />
     <link rel="canonical" href="https://photoeditor.enggviz.online/">
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <link href="style.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
@@ -38,7 +38,7 @@
                 <select id="format">
                     <option value="image/webp">WebP</option>
                     <option value="image/jpeg">JPEG</option>
-                    <option value="image/png">PNG</option>
+                    <option value="image/png" selected>PNG</option>
                 </select>
             </div>
         </div>
@@ -46,14 +46,24 @@
         <div class="dimension-grid" id="effect-params">
             <div class="form-group">
                 <label>Filter (Color)</label>
-                <select id="filter">
+                <select id="filter" onchange="handleFilterDropdownChange(this)">
                     <option value="none">None</option>
                     <option value="goldenHour">Golden Hour</option>
-                    <option value="vintage">Vintage Film</option>
+                    <option value="sepia">Sepia</option>
                     <option value="noir">Noir</option>
                     <option value="lomo">Lomo</option>
-                    <option value="coldbrew">Cold Brew</option>
-                    <option value="dreamy">Dreamy Aesthetic</option>
+
+                    <option value="show-more-toggle" id="inlineToggleOption">✨ Show More Filters...</option>
+
+                    <option value="coldbrew" class="extended-filter">Cold Brew</option>
+                    <option value="dreamy" class="extended-filter">Dreamy Aesthetic</option>
+                    <option value="cyberpunk" class="extended-filter">Cyberpunk</option>
+                    <option value="duotone" class="extended-filter">Duotone</option>
+                    <option value="brownie" class="extended-filter">Brownie</option>
+                    <option value="vintage" class="extended-filter">Vintage Retro</option>
+                    <option value="matcha" class="extended-filter">Matcha Latte</option>
+                    <option value="tealOrange" class="extended-filter">Teal & Orange</option>
+                    <option value="midnight" class="extended-filter">Midnight Vibe</option>
                 </select>
             </div>
             <div class="form-group">
@@ -65,6 +75,7 @@
                     <option value="filmStrip">Film Strip</option>
                     <option value="gallery">Museum Gallery</option>
                     <option value="blurBg">Blur Background</option>
+                    <option value="magazine">Magazine</option>
                     <option value="border">Border</option>
                 </select>
             </div>
@@ -91,10 +102,8 @@
             </div>
 
             <div class="color-pad-row">
-                <input type="color" id="frameColor" value="#ffffff" style="display:none;">
-
-                <!-- Padding (hidden by default) -->
-                <input type="number" id="paddingInput" placeholder="Padding px" style="display:none;">
+                <input type="color" id="frameColor" value="#ffffff">
+                <input type="number" id="paddingInput" placeholder="Padding px">
             </div>
         </div>
 
@@ -113,13 +122,14 @@
 
         <div id="preview-section" style="margin-bottom: 20px; text-align: center;">
             <label style="justify-content: center;">Live Preview</label>
-
             <div class="preview-box">
                 <canvas id="previewCanvas"></canvas>
             </div>
         </div>
 
         <button onclick="startProcess()">Start Processing</button>
+
+        <div id="status"></div>
 
         <div class="instructions">
             <h3>Quick Guide</h3>
@@ -129,9 +139,31 @@
                 <li><strong>Format:</strong> WebP is recommended for high quality at small file sizes.</li>
                 <li><strong>Effects:</strong> Apply effects easily and in one click.</li>
             </ul>
-        </div>
 
-        <div id="status"></div>
+            <h3 style="margin-top: 15px;">🔥 Cool Combos to Try</h3>
+            <ul class="combos-list">
+                <li>
+                    <strong>The Aesthetic Diary:</strong> Dreamy Aesthetic + Polaroid
+                    <em>(Great for custom text captions)</em>
+                </li>
+                <li>
+                    <strong>Retro Cinema:</strong> Sepia + Film Strip
+                    <em>(Gives a classic 90s analog vibe)</em>
+                </li>
+                <li>
+                    <strong>Modern Gallery:</strong> Noir (B&W) + Museum Gallery
+                    <em>(Perfect for clean, artistic portraits)</em>
+                </li>
+                <li>
+                    <strong>Cyberpunk Streets:</strong> Cyberpunk + Glass Morphism
+                    <em>(Looks incredible with colorful night shots)</em>
+                </li>
+                <li>
+                    <strong>Warm Minimalism:</strong> Brownie + Border
+                    <em>(Gives a cozy, premium Instagram look)</em>
+                </li>
+            </ul>
+        </div>
     </div>
 
     <div id="cropper-ui">
@@ -149,6 +181,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script src="script.js"></script>
+    <script src="effect.js"></script>
 </body>
 
 </html>

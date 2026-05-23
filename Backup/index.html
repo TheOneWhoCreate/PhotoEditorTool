@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Editor</title>
+ <meta name="google-site-verification" content="HFdHX7Q4Y6E8mt4UqFaT8tnUZDCw8ZJZ40tHVPgFV7s" />
+    <link rel="canonical" href="https://photoeditor.enggviz.online/">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link href="style.css" rel="stylesheet">
+</head>
+
+<body>
+    <div id="main-menu">
+        <h2>Photo Editor</h2>
+
+        <div class="form-group" id="file-input-params">
+            <label>Select Photos</label>
+            <input type="file" id="fileInput" multiple accept="image/*">
+        </div>
+
+        <div class="dimension-grid" id="purpose-format-params">
+            <div class="form-group">
+                <label>Posting To:</label>
+                <select id="purpose">
+                    <option value="custom">Custom (Use Manual Inputs)</option>
+                    <option value="passport">Passport Photo</option>
+                    <option value="insta-feed (3:4)">Instagram Feed (3:4)</option>
+                    <option value="insta-feed (4:5)">Instagram Feed (4:5)</option>
+                    <option value="insta-square">Instagram Square (1:1)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Save Format</label>
+                <select id="format">
+                    <option value="image/webp">WebP</option>
+                    <option value="image/jpeg">JPEG</option>
+                    <option value="image/png">PNG</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="dimension-grid" id="effect-params">
+            <div class="form-group">
+                <label>Filter (Color)</label>
+                <select id="filter">
+                    <option value="none">None</option>
+                    <option value="goldenHour">Golden Hour</option>
+                    <option value="vintage">Vintage Film</option>
+                    <option value="noir">Noir</option>
+                    <option value="lomo">Lomo</option>
+                    <option value="coldbrew">Cold Brew</option>
+                    <option value="dreamy">Dreamy Aesthetic</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Frame (Layout)</label>
+                <select id="frame">
+                    <option value="none">None</option>
+                    <option value="polaroid">Polaroid</option>
+                    <option value="glassFrame">Glass Morphism</option>
+                    <option value="filmStrip">Film Strip</option>
+                    <option value="gallery">Museum Gallery</option>
+                    <option value="blurBg">Blur Background</option>
+                    <option value="border">Border</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="dimension-grid" id="dimension-params">
+            <div class="form-group">
+                <label>Width (Optional)</label>
+                <input type="number" id="manualWidth" placeholder="Auto (Pixels)" min="1">
+            </div>
+            <div class="form-group">
+                <label>Height (Optional)</label>
+                <input type="number" id="manualHeight" placeholder="Auto (Pixels)" min="1">
+            </div>
+        </div>
+
+        <div class="form-group" id="color-pad-params">
+            <div id="colorlabel">
+                Frame/Background Color
+                <span id="color-disclaimer"
+                    style="color: #d93025; font-size: 0.8rem; margin-left: 10px; display: none;">
+                    * White works best for Polaroid
+                </span>
+            </div>
+
+            <div class="color-pad-row">
+                <input type="color" id="frameColor" value="#ffffff" style="display:none;">
+
+                <!-- Padding (hidden by default) -->
+                <input type="number" id="paddingInput" placeholder="Padding px" style="display:none;">
+            </div>
+        </div>
+
+        <div class="form-group" id="caption-params">
+            <label id="caption" style="display: none;">Polaroid Caption (Optional)</label>
+            <input type="text" id="polaroidText" placeholder="Enter caption..." style="display: none;"
+                class="standard-input">
+        </div>
+
+        <div class="checkbox-container">
+            <input type="checkbox" id="manualCropCheck">
+            <label for="manualCropCheck" style="margin:0; cursor:pointer; flex-grow:1;">
+                Manual Crop
+            </label>
+        </div>
+
+        <div id="preview-section" style="margin-bottom: 20px; text-align: center;">
+            <label style="justify-content: center;">Live Preview</label>
+
+            <div class="preview-box">
+                <canvas id="previewCanvas"></canvas>
+            </div>
+        </div>
+
+        <button onclick="startProcess()">Start Processing</button>
+
+        <div class="instructions">
+            <h3>Quick Guide</h3>
+            <ul>
+                <li><strong>Manual Crop:</strong> Lets you adjust the frame for each photo.</li>
+                <li><strong>Insta Tip:</strong> For the best feed result, use <strong>4:5</strong> ratio.</li>
+                <li><strong>Format:</strong> WebP is recommended for high quality at small file sizes.</li>
+                <li><strong>Effects:</strong> Apply effects easily and in one click.</li>
+            </ul>
+        </div>
+
+        <div id="status"></div>
+    </div>
+
+    <div id="cropper-ui">
+        <h2 id="crop-counter">Photo 1 of 1</h2>
+        <p>Adjust your crop below. The selected effect will be applied automatically upon saving.</p>
+
+        <div class="crop-container">
+            <img id="crop-image" src="" alt="To Crop">
+        </div>
+
+        <button onclick="saveCropAndNext()">Save & Next</button>
+        <button class="btn-skip" onclick="skipAndNext()">Skip this photo</button>
+        <button class="btn-secondary" onclick="cancelCropping()">Cancel / Go Back</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
