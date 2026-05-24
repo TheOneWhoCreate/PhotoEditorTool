@@ -142,18 +142,9 @@ const EffectsEngine = {
             }
             fCtx.putImageData(idata, 0, 0);
 
-            // Apply filter properties to context, draw the modified state onto itself using a temporary canvas layer
-            fCtx.save();
+            // Add a warm contrast pass to bake the rich brown tones into the highlights
             fCtx.filter = "contrast(1.25) brightness(1.02) saturate(1.1)";
-            // Create a quick inline snapshot of your custom pixel mutations
-            const tempSnap = document.createElement('canvas');
-            tempSnap.width = imgW;
-            tempSnap.height = imgH;
-            tempSnap.getContext('2d').putImageData(idata, 0, 0);
-
-            fCtx.clearRect(0, 0, imgW, imgH);
-            fCtx.drawImage(tempSnap, 0, 0);
-            fCtx.restore();
+            fCtx.drawImage(filterCanvas, 0, 0);
             fCtx.filter = "none";
         }
 

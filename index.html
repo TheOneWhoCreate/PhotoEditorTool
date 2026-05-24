@@ -15,154 +15,183 @@
 
 <body>
     <div id="main-menu">
-        <h2>Photo Editor</h2>
+        <div class="ui-col" id="passport-column">
+            <span class="passport-badge">OFFICIAL RATIO</span>
+            <h3>Passport Studio</h3>
 
-        <div class="form-group" id="file-input-params">
-            <label>Select Photos</label>
-            <input type="file" id="fileInput" multiple accept="image/*">
-        </div>
+            <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">
+                Quickly format prints to standard 35mm x 45mm passport sizing sheets.
+            </p>
 
-        <div class="dimension-grid" id="purpose-format-params">
+            <hr style="border:0; border-top:1px solid #eee; margin-bottom:15px;">
+
             <div class="form-group">
-                <label>Posting To:</label>
-                <select id="purpose">
-                    <option value="custom">Custom (Use Manual Inputs)</option>
-                    <option value="passport">Passport Photo</option>
-                    <option value="insta-feed (3:4)">Instagram Feed (3:4)</option>
-                    <option value="insta-feed (4:5)">Instagram Feed (4:5)</option>
-                    <option value="insta-square">Instagram Square (1:1)</option>
+                <label>Upload Photos</label>
+                <input type="file" id="fileInput" multiple accept="image/*">
+            </div>
+
+            <div class="form-group">
+                <label>Print Grid Layout</label>
+                <select id="passportLayout">
+                    <option value="5x6" selected>5 * 6 Grid (30 Photos - Centered Page)</option>
+                    <option value="4x2">4 * 2 Grid (8 Photos - Align Top)</option>
+                    <option value="4x6">4 * 6 Grid (24 Photos - Flush Top, No Top Space)</option>
                 </select>
             </div>
-            <div class="form-group">
-                <label>Save Format</label>
-                <select id="format">
-                    <option value="image/webp">WebP</option>
-                    <option value="image/jpeg">JPEG</option>
-                    <option value="image/png" selected>PNG</option>
-                </select>
+
+            <div class="checkbox-container">
+                <input type="checkbox" id="passportManualCropCheck" checked>
+                <label for="passportManualCropCheck" style="margin:0; cursor:pointer; flex-grow:1;">
+                    Manual Crop (Passport)
+                </label>
+            </div>
+
+            <button class="btn-passport" onclick="startPassportProcess()">Build Passport Sheet</button>
+            <div id="status" style="margin-top: 10px; font-size: 0.85rem;"></div>
+        </div>
+
+        <div class="ui-col" id="controls-column">
+            <h2>Photo Editor Control Panel</h2>
+            
+            <div class="dimension-grid" id="purpose-format-params">
+                <div class="form-group">
+                    <label>Posting To:</label>
+                    <select id="purpose">
+                        <option value="custom">Custom</option>
+                        <option value="insta-feed (3:4)">Instagram Feed (3:4)</option>
+                        <option value="insta-feed (4:5)">Instagram Feed (4:5)</option>
+                        <option value="insta-square">Instagram Square (1:1)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Save Format</label>
+                    <select id="format">
+                        <option value="image/webp">WebP</option>
+                        <option value="image/jpeg">JPEG</option>
+                        <option value="image/png" selected>PNG</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="dimension-grid" id="effect-params">
+                <div class="form-group">
+                    <label>Filter Profile</label>
+                    <select id="filter" onchange="handleFilterDropdownChange(this)">
+                        <option value="none">None</option>
+                        <option value="goldenHour">Golden Hour</option>
+                        <option value="sepia">Sepia</option>
+                        <option value="noir">Noir</option>
+                        <option value="lomo">Lomo</option>
+
+                        <option value="show-more-toggle" id="inlineToggleOption">✨ Show More Filters...</option>
+
+                        <option value="coldbrew" class="extended-filter">Cold Brew</option>
+                        <option value="dreamy" class="extended-filter">Dreamy Aesthetic</option>
+                        <option value="cyberpunk" class="extended-filter">Cyberpunk</option>
+                        <option value="duotone" class="extended-filter">Duotone</option>
+                        <option value="brownie" class="extended-filter">Brownie</option>
+                        <option value="vintage" class="extended-filter">Vintage Retro</option>
+                        <option value="matcha" class="extended-filter">Matcha Latte</option>
+                        <option value="midnight" class="extended-filter">Midnight Vibe</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Frame Style</label>
+                    <select id="frame">
+                        <option value="none">None</option>
+                        <option value="polaroid">Polaroid</option>
+                        <option value="glassFrame">Glass Morphism</option>
+                        <option value="filmStrip">Film Strip</option>
+                        <option value="gallery">Museum Gallery</option>
+                        <option value="blurBg">Blur Background</option>
+                        <option value="magazine">Magazine</option>
+                        <option value="border">Border</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- <div class="dimension-grid" id="dimension-params">
+                <div class="form-group">
+                    <label>Width (Optional)</label>
+                    <input type="number" id="manualWidth" placeholder="Auto (Pixels)" min="1">
+                </div>
+
+                <div class="form-group">
+                    <label>Height (Optional)</label>
+                    <input type="number" id="manualHeight" placeholder="Auto (Pixels)" min="1">
+                </div>
+            </div> -->
+
+            <div class="form-group" id="color-pad-params">
+                <div id="colorlabel">
+                    Frame/Background Color
+                    <span id="color-disclaimer"
+                        style="color: #d93025; font-size: 0.8rem; margin-left: 10px; display: none;">
+                        * White works best for Polaroid
+                    </span>
+                </div>
+
+                <div class="color-pad-row">
+                    <input type="color" id="frameColor" value="#ffffff">
+                    <input type="number" id="paddingInput" placeholder="Padding px">
+                </div>
+            </div>
+
+            <div class="form-group" id="caption-params">
+                <label id="caption" style="display: none;">Polaroid Caption (Optional)</label>
+                <input type="text" id="polaroidText" placeholder="Enter caption..." style="display: none;"
+                    class="standard-input">
+            </div>
+
+            <div class="checkbox-container">
+                <input type="checkbox" id="manualCropCheck">
+                <label for="manualCropCheck" style="margin:0; cursor:pointer; flex-grow:1;"> Manual Crop </label>
+            </div>
+
+            <button onclick="startProcess()">Start Processing Batch</button>
+
+            <div class="instructions">
+                <h3>Quick Guide</h3>
+                <ul>
+                    <li><strong>Format:</strong> WebP is recommended for high quality at small file sizes.</li>
+                    <li><strong>Effects:</strong> Apply effects easily and in one click.</li>
+                </ul>
+
+                <h3 style="margin-top: 15px;">🔥 Cool Combos to Try</h3>
+                <ul class="combos-list">
+                    <li><strong>The Aesthetic Diary:</strong> Dreamy Aesthetic + Polaroid
+                        <em>(Great for custom text captions)</em>
+                    </li>
+                    <li><strong>Retro Cinema:</strong> Sepia + Film Strip
+                        <em>(Gives a classic 90s analog vibe)</em>
+                    </li>
+                    <li><strong>Modern Gallery:</strong> Noir (B&W) + Museum Gallery
+                        <em>(Perfect for clean, artistic portraits)</em>
+                    </li>
+                    <li><strong>Cyberpunk Streets:</strong> Cyberpunk + Glass Morphism
+                        <em>(Looks incredible with colorful night shots)</em>
+                    </li>
+                    <li><strong>Warm Minimalism:</strong> Brownie + Border
+                        <em>(Gives a cozy, premium Instagram look)</em>
+                    </li>
+                </ul>
             </div>
         </div>
 
-        <div class="dimension-grid" id="effect-params">
-            <div class="form-group">
-                <label>Filter (Color)</label>
-                <select id="filter" onchange="handleFilterDropdownChange(this)">
-                    <option value="none">None</option>
-                    <option value="goldenHour">Golden Hour</option>
-                    <option value="sepia">Sepia</option>
-                    <option value="noir">Noir</option>
-                    <option value="lomo">Lomo</option>
+        <div class="ui-col" id="preview-column">
+            <h3>Live Composition</h3>
+            <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">
+                Real-time graphics preview window before rendering outputs.
+            </p>
+            <hr style="border:0; border-top:1px solid #eee; margin-bottom:15px;">
 
-                    <option value="show-more-toggle" id="inlineToggleOption">✨ Show More Filters...</option>
-
-                    <option value="coldbrew" class="extended-filter">Cold Brew</option>
-                    <option value="dreamy" class="extended-filter">Dreamy Aesthetic</option>
-                    <option value="cyberpunk" class="extended-filter">Cyberpunk</option>
-                    <option value="duotone" class="extended-filter">Duotone</option>
-                    <option value="brownie" class="extended-filter">Brownie</option>
-                    <option value="vintage" class="extended-filter">Vintage Retro</option>
-                    <option value="matcha" class="extended-filter">Matcha Latte</option>
-                    <option value="tealOrange" class="extended-filter">Teal & Orange</option>
-                    <option value="midnight" class="extended-filter">Midnight Vibe</option>
-                </select>
+            <div id="preview-section" style="text-align: center;">
+                <div class="preview-box">
+                    <canvas id="previewCanvas"></canvas>
+                </div>
             </div>
-            <div class="form-group">
-                <label>Frame (Layout)</label>
-                <select id="frame">
-                    <option value="none">None</option>
-                    <option value="polaroid">Polaroid</option>
-                    <option value="glassFrame">Glass Morphism</option>
-                    <option value="filmStrip">Film Strip</option>
-                    <option value="gallery">Museum Gallery</option>
-                    <option value="blurBg">Blur Background</option>
-                    <option value="magazine">Magazine</option>
-                    <option value="border">Border</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="dimension-grid" id="dimension-params">
-            <div class="form-group">
-                <label>Width (Optional)</label>
-                <input type="number" id="manualWidth" placeholder="Auto (Pixels)" min="1">
-            </div>
-            <div class="form-group">
-                <label>Height (Optional)</label>
-                <input type="number" id="manualHeight" placeholder="Auto (Pixels)" min="1">
-            </div>
-        </div>
-
-        <div class="form-group" id="color-pad-params">
-            <div id="colorlabel">
-                Frame/Background Color
-                <span id="color-disclaimer"
-                    style="color: #d93025; font-size: 0.8rem; margin-left: 10px; display: none;">
-                    * White works best for Polaroid
-                </span>
-            </div>
-
-            <div class="color-pad-row">
-                <input type="color" id="frameColor" value="#ffffff">
-                <input type="number" id="paddingInput" placeholder="Padding px">
-            </div>
-        </div>
-
-        <div class="form-group" id="caption-params">
-            <label id="caption" style="display: none;">Polaroid Caption (Optional)</label>
-            <input type="text" id="polaroidText" placeholder="Enter caption..." style="display: none;"
-                class="standard-input">
-        </div>
-
-        <div class="checkbox-container">
-            <input type="checkbox" id="manualCropCheck">
-            <label for="manualCropCheck" style="margin:0; cursor:pointer; flex-grow:1;">
-                Manual Crop
-            </label>
-        </div>
-
-        <div id="preview-section" style="margin-bottom: 20px; text-align: center;">
-            <label style="justify-content: center;">Live Preview</label>
-            <div class="preview-box">
-                <canvas id="previewCanvas"></canvas>
-            </div>
-        </div>
-
-        <button onclick="startProcess()">Start Processing</button>
-
-        <div id="status"></div>
-
-        <div class="instructions">
-            <h3>Quick Guide</h3>
-            <ul>
-                <li><strong>Manual Crop:</strong> Lets you adjust the frame for each photo.</li>
-                <li><strong>Insta Tip:</strong> For the best feed result, use <strong>4:5</strong> ratio.</li>
-                <li><strong>Format:</strong> WebP is recommended for high quality at small file sizes.</li>
-                <li><strong>Effects:</strong> Apply effects easily and in one click.</li>
-            </ul>
-
-            <h3 style="margin-top: 15px;">🔥 Cool Combos to Try</h3>
-            <ul class="combos-list">
-                <li>
-                    <strong>The Aesthetic Diary:</strong> Dreamy Aesthetic + Polaroid
-                    <em>(Great for custom text captions)</em>
-                </li>
-                <li>
-                    <strong>Retro Cinema:</strong> Sepia + Film Strip
-                    <em>(Gives a classic 90s analog vibe)</em>
-                </li>
-                <li>
-                    <strong>Modern Gallery:</strong> Noir (B&W) + Museum Gallery
-                    <em>(Perfect for clean, artistic portraits)</em>
-                </li>
-                <li>
-                    <strong>Cyberpunk Streets:</strong> Cyberpunk + Glass Morphism
-                    <em>(Looks incredible with colorful night shots)</em>
-                </li>
-                <li>
-                    <strong>Warm Minimalism:</strong> Brownie + Border
-                    <em>(Gives a cozy, premium Instagram look)</em>
-                </li>
-            </ul>
         </div>
     </div>
 
