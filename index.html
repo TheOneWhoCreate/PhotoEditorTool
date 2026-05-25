@@ -14,19 +14,26 @@
 </head>
 
 <body>
+    <div class="theme-toggle-container" style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
+        <label class="switch-layout"
+            style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600;">
+            <span>Dark Mode</span>
+            <input type="checkbox" id="themeToggleCheckbox" onchange="toggleWorkspaceTheme()"
+                style="width: auto; cursor: pointer;">
+        </label>
+    </div>
+
     <div id="main-menu">
         <div class="ui-col" id="passport-column">
             <span class="passport-badge">OFFICIAL RATIO</span>
             <h3>Passport Studio</h3>
 
-            <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">
-                Quickly format prints to standard 35mm x 45mm passport sizing sheets.
-            </p>
+            <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">Quickly format prints to standard 35mm x 45mm passport sizing sheets.</p>
 
             <hr style="border:0; border-top:1px solid #eee; margin-bottom:15px;">
 
             <div class="form-group">
-                <label>Upload Photos</label>
+                <label>Upload Single or Multiple Photos</label>
                 <input type="file" id="fileInput" multiple accept="image/*">
             </div>
 
@@ -152,44 +159,60 @@
 
             <button onclick="startProcess()">Start Processing Batch</button>
 
-            <div class="instructions">
-                <h3>Quick Guide</h3>
-                <ul>
-                    <li><strong>Format:</strong> WebP is recommended for high quality at small file sizes.</li>
-                    <li><strong>Effects:</strong> Apply effects easily and in one click.</li>
-                </ul>
 
-                <h3 style="margin-top: 15px;">🔥 Cool Combos to Try</h3>
-                <ul class="combos-list">
-                    <li><strong>The Aesthetic Diary:</strong> Dreamy Aesthetic + Polaroid
-                        <em>(Great for custom text captions)</em>
-                    </li>
-                    <li><strong>Retro Cinema:</strong> Sepia + Film Strip
-                        <em>(Gives a classic 90s analog vibe)</em>
-                    </li>
-                    <li><strong>Modern Gallery:</strong> Noir (B&W) + Museum Gallery
-                        <em>(Perfect for clean, artistic portraits)</em>
-                    </li>
-                    <li><strong>Cyberpunk Streets:</strong> Cyberpunk + Glass Morphism
-                        <em>(Looks incredible with colorful night shots)</em>
-                    </li>
-                    <li><strong>Warm Minimalism:</strong> Brownie + Border
-                        <em>(Gives a cozy, premium Instagram look)</em>
-                    </li>
-                </ul>
+            <div class="instruction-header">
+                <h3>Workspace Tips</h3>
             </div>
+
+            <div class="tip-card">
+                <span class="tip-badge webp-badge">WebP</span>
+                <p><strong>Recommended Format:</strong> High fidelity at exceptionally small file sizes. Perfect for
+                    rapid sharing.</p>
+            </div>
+
+            <div class="tip-card">
+                <span class="tip-badge batch-badge">Batch</span>
+                <p><strong>Bulk Automations:</strong> Leave <em>Manual Crop</em> unchecked to automatically process
+                    large asset lists in a single click.</p>
+            </div>
+
         </div>
 
         <div class="ui-col" id="preview-column">
             <h3>Live Composition</h3>
-            <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">
-                Real-time graphics preview window before rendering outputs.
-            </p>
+
+            <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">Real-time graphics preview window before rendering outputs.</p>
             <hr style="border:0; border-top:1px solid #eee; margin-bottom:15px;">
 
             <div id="preview-section" style="text-align: center;">
                 <div class="preview-box">
                     <canvas id="previewCanvas"></canvas>
+                </div>
+            </div>
+
+            <div class="recipes-panel">
+                <h3>Presets & Creative Recipes</h3>
+                
+                <div class="combos-grid">
+                    <div class="combo-pill">
+                        <span class="combo-tag tag-aesthetic">Aesthetic</span>
+                        <p>Dreamy + Polaroid <em>(Custom texts)</em></p>
+                    </div>
+
+                    <div class="combo-pill">
+                        <span class="combo-tag tag-retro">Analog</span>
+                        <p>Sepia + Film Strip <em>(90s cinema vibe)</em></p>
+                    </div>
+
+                    <div class="combo-pill">
+                        <span class="combo-tag tag-modern">Gallery</span>
+                        <p>Noir + Museum Gallery <em>(Artistic portraits)</em></p>
+                    </div>
+
+                    <div class="combo-pill">
+                        <span class="combo-tag tag-cyber">Neon</span>
+                        <p>Cyberpunk + Glass Morphism <em>(Night shots)</em></p>
+                    </div>
                 </div>
             </div>
         </div>

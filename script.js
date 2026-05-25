@@ -385,7 +385,7 @@ function generatePassportPDF(images) {
 
     // Adjusted gaps slightly smaller for 4x6 inch constraint fit
     const gapX = isCustom4x6Page ? 2.0 : 4.0;
-    const gapY = isCustom4x6Page ? 2.0 : 4.0;
+    const gapY = (layoutConfig === "4x6") ? 2.5 : (isCustom4x6Page ? 2.0 : 4.0);
 
     const totalGridWidth = (cols * imgW) + ((cols - 1) * gapX);
     const totalGridHeight = (rows * imgH) + ((rows - 1) * gapY);
@@ -397,7 +397,8 @@ function generatePassportPDF(images) {
     // Maintain your legacy manual override offsets only on standard A4 template modes
     if (!isCustom4x6Page) {
         if (layoutConfig === "4x6") {
-            startY = 10;
+            // Safe centered distribution limit for 24 pictures
+            if (startY < 8) startY = 8;
         }
     }
 
@@ -460,6 +461,35 @@ async function applyEffectAndDownload(sourceImg, filter, frame, format, original
         link.click();
     }, format, quality);
 }
+
+// DYNAMIC GLOBAL THEME INTERACTION CONTROLLER 
+function toggleWorkspaceTheme() {
+    const isChecked = document.getElementById('themeToggleCheckbox').checked;
+
+    if (isChecked) {
+        // Apply dark attributes to document node element
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.body.classList.add('dark-mode-gradient');
+        localStorage.setItem('workspaceThemeSetting', 'dark'); // Save user preference
+    } else {
+        // Reset document back to core factory default light scheme
+        document.documentElement.removeAttribute('data-theme');
+        document.body.classList.remove('dark-mode-gradient');
+        localStorage.setItem('workspaceThemeSetting', 'light');
+    }
+}
+
+// Auto-Load saved theme preference when the page initializes
+document.addEventListener("DOMContentLoaded", () => {
+    const savedTheme = localStorage.getItem('workspaceThemeSetting');
+    const themeCheckbox = document.getElementById('themeToggleCheckbox');
+
+    if (savedTheme === 'dark' && themeCheckbox) {
+        themeCheckbox.checked = true;
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.body.classList.add('dark-mode-gradient');
+    }
+});
 
 // UTILITIES
 function loadImage(file) {
