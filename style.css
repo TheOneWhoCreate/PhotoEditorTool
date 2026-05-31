@@ -32,6 +32,233 @@ body {
     color 0.3s ease;
 }
 
+/* TOP NAVIGATION HEADER BAR (3-COLUMN FLEX LAYOUT) */
+.top-nav-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  width: 100%;
+  max-width: 1600px;
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+/* 3-Column Equal Width Flex Hack for perfect centering */
+.nav-spacer,
+.nav-title-block,
+.nav-toggle-block {
+  flex: 1;
+}
+
+.nav-spacer {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.nav-title-block {
+  display: flex;
+  justify-content: center;
+}
+
+.nav-toggle-block {
+  display: flex;
+  justify-content: flex-end;
+  padding-right: 10px;
+}
+
+.app-title {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-align: center;
+  text-transform: uppercase;
+  color: var(--primary);
+  padding-bottom: 2px;
+  transition: color 0.3s ease;
+}
+
+.switch-layout {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+  transition: color 0.3s ease;
+}
+
+.switch-layout input[type="checkbox"] {
+  width: auto;
+  cursor: pointer;
+}
+
+/* BOTTOM NAVIGATION FOOTER BAR */
+.bottom-nav-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  width: 100%;
+  max-width: 1600px;
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+  border-top: 1px dashed #242526; /* Clean, elegant separator line */
+  transition: all 0.3s ease;
+}
+
+/* 3-Column Equal Width Flex Distribution */
+.footer-author-block,
+.footer-tagline-block,
+.footer-contact-block {
+  flex: 1;
+}
+
+.footer-author-block {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.footer-tagline-block {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}
+
+.footer-contact-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  padding-right: 10px;
+}
+
+/* Typography elements */
+.footer-label {
+  margin: 0 0 4px 0;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+  color: #666;
+}
+
+.footer-highlight {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.footer-tag-line {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #555;
+  font-weight: 500;
+  font-style: italic;
+}
+
+.footer-copy-right {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: 0.2px;
+  transition: color 0.3s ease;
+}
+
+/* Contact Anchors configuration */
+.footer-links {
+  display: flex;
+  gap: 12px;
+}
+
+.footer-link {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--primary);
+  text-decoration: none;
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.footer-link:hover {
+  color: var(--primary-hover);
+  text-decoration: underline;
+}
+
+/* header $ footer mq */
+@media (max-width: 1024px) {
+  .top-nav-header {
+    flex-direction: row; /* Keep them on the same line, but change balancing rules */
+    padding: 10px 15px; /* Add comfortable padding on mobile edges */
+    margin-bottom: 15px;
+  }
+
+  .bottom-nav-footer {
+    flex-direction: row; /* Keep them on the same line, but change balancing rules */
+    padding: 10px 15px; /* Add comfortable padding on mobile edges */
+    margin-bottom: 15px;
+  }
+
+  /* Hide the invisible spacer entirely on mobile to free up horizontal space */
+  .nav-spacer {
+    display: none !important;
+  }
+
+  .footer-tagline-block {
+    display: none !important;
+  }
+
+  /* Reset flex overrides so columns scale down naturally to content size */
+  .nav-title-block,
+  .nav-toggle-block {
+    flex: auto;
+  }
+
+  .footer-author-block,
+  .footer-contact-block {
+    flex: auto;
+  }
+
+  /* Push the title to the left edge */
+  .nav-title-block {
+    justify-content: flex-start;
+  }
+
+  .footer-author-block {
+    justify-content: flex-start;
+  }
+
+  /* Push the switch toggle to the right edge */
+  .nav-toggle-block {
+    justify-content: flex-end;
+    padding-right: 0;
+  }
+
+  .footer-contact-block {
+    align-items: flex-end;
+    padding-right: 0px;
+  }
+
+  /* Slightly shrink text sizes so they scale beautifully on small screens */
+  .app-title {
+    font-size: 1.25rem;
+  }
+
+  .switch-layout {
+    font-size: 0.8rem;
+  }
+}
+
 /* THREE-COLUMN GRID SYSTEM (Glassmorphism Effect) */
 #main-menu {
   display: grid;
@@ -39,7 +266,9 @@ body {
   gap: 20px;
   max-width: 1600px;
   margin: 0 auto;
-  align-items: start; /* Prevents columns from stretching vertically to match height */
+  padding-top: 10px;
+  padding-bottom: 10px;
+  align-items: normal; /* Prevents columns from stretching vertically to match height */
   animation: fadeSlide 0.6s ease;
 }
 
@@ -88,6 +317,7 @@ body {
 h2,
 h3 {
   margin-top: 0;
+  margin-bottom: 12px;
   color: #1a1a1a;
 }
 
@@ -95,6 +325,15 @@ h2 {
   border-bottom: 2px solid #eee;
   padding-bottom: 10px;
   text-align: center;
+}
+
+#controls-column > h2:first-child {
+  border-bottom: 2px solid #eee;
+  padding-bottom: 10px;
+  text-align: center;
+  color: #1a1a1a;
+  margin-top: 0;
+  margin-bottom: 12px;
 }
 
 /* FORM ELEMENTS & PASSPORT PANEL UI */
@@ -153,6 +392,68 @@ input[type="file"]::-webkit-file-upload-button {
 
 input[type="file"]::-webkit-file-upload-button:hover {
   background: var(--primary-hover);
+}
+
+/* DRAG & DROP UPLOAD ZONE STYLES  */
+.drop-zone {
+  margin-bottom: 18px;
+}
+
+.drop-zone-inside {
+  width: 100%;
+  height: 250px;
+  padding: 20px 15px;
+  text-align: center;
+  border: 2px dashed var(--border);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Hover State - Subtle lifting effect */
+.drop-zone-inside:hover {
+  border-color: var(--primary);
+  background: rgba(255, 255, 255, 0.8);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 102, 204, 0.05);
+}
+
+/* Active Drag State - Animated pulse border when files are hovering over the window */
+.drop-zone.drag-active .drop-zone-inside {
+  border-color: #28a745; /* Clean green border action indicator */
+  background: rgba(40, 167, 69, 0.08) !important;
+  transform: scale(0.99);
+  border-style: solid;
+  box-shadow: 0 0 15px rgba(40, 167, 69, 0.15) !important;
+}
+
+/* Typography & Asset Controls Inside the Zone */
+.drop-icon {
+  font-size: 1.8rem;
+  margin-bottom: 8px;
+  transition: transform 0.2s ease;
+}
+
+.drop-zone-inside:hover .drop-icon {
+  transform: scale(1.1);
+}
+
+.drop-zone-inside p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #555;
+  font-weight: 500;
+}
+
+.drop-zone-inside p strong {
+  color: var(--primary);
+  text-decoration: underline;
 }
 
 input:focus,
@@ -277,6 +578,19 @@ button:hover {
   background: #c82333;
 }
 
+.btn-reset {
+  background: #64748b !important; /* Cool Slate Gray */
+  font-size: 0.95rem !important;
+  padding: 14px 10px !important;
+  box-shadow: 0 4px 6px rgba(100, 116, 139, 0.15);
+}
+
+.btn-reset:hover {
+  background: #475569 !important; /* Deeper Darker Slate */
+  box-shadow: 0 0 12px rgba(100, 116, 139, 0.4) !important;
+}
+
+/*passport btn*/
 .btn-passport {
   background: #28a745;
   box-shadow: 0 4px 6px rgba(40, 167, 69, 0.2);
@@ -302,6 +616,18 @@ img {
   display: block;
   max-width: 100%;
 }
+
+/* #filter {
+  transition: size 0.2s ease;
+}
+
+#filter[size]:not([size="1"]) {
+  position: absolute;
+  z-index: 100;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  height: 200px;
+  width: 200px;
+} */
 
 .color-pad-row {
   display: flex;
@@ -354,6 +680,8 @@ img {
   margin: 0;
   font-size: 0.95rem;
   color: #1a1a1a;
+  padding-bottom: 5px;
+  padding-top: 5px;
 }
 
 .tip-card {
@@ -395,11 +723,17 @@ img {
   border: 1px solid #b7eb8f;
 }
 
+.effects-badge {
+  background: #fff0f6;
+  color: #612feb;
+  border: 1px solid #adffff;
+}
+
 /* Recipe Combos & Presets */
-#preview-column .recipes-panel h3 {
-  margin-top: 12px;
+.recipes-panel > :first-child {
+  margin-top: 15px;
   font-size: 0.95rem;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   color: var(--primary);
 }
 
@@ -486,9 +820,14 @@ img {
   box-sizing: border-box;
 }
 
-#preview-column h3 {
+#preview-column > h3:first-child {
   margin-top: 0;
   margin-bottom: 12px;
+  font-size: 1.5rem;
+  text-align: center;
+  color: #1a1a1a;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #eee;
 }
 
 #previewCanvas {
@@ -534,7 +873,8 @@ body.dark-mode-gradient {
 [data-theme="dark"] h2,
 [data-theme="dark"] h3,
 [data-theme="dark"] label,
-[data-theme="dark"] #colorlabel {
+[data-theme="dark"] #colorlabel,
+[data-theme="dark"] .app-title {
   color: #f1f5f9 !important;
 }
 
@@ -576,11 +916,55 @@ body.dark-mode-gradient {
   border-color: rgba(255, 255, 255, 0.1) !important;
 }
 
-[data-theme="dark"] .combo-pill p {
+[data-theme="dark"] .combo-pill p,
+[data-theme="dark"] .tip-card p {
   color: #e2e8f0 !important;
 }
 
 [data-theme="dark"] .combo-pill:hover {
   background: #1e293b !important;
   border-color: var(--primary) !important;
+}
+
+[data-theme="dark"] .btn-reset {
+  background: #334155 !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+[data-theme="dark"] .btn-reset:hover {
+  background: #475569 !important;
+}
+
+[data-theme="dark"] .drop-zone-inside {
+  background: rgba(30, 41, 59, 0.3);
+  border-color: #334155;
+}
+
+[data-theme="dark"] .drop-zone-inside:hover {
+  background: rgba(30, 41, 59, 0.6);
+  border-color: var(--primary);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .drop-zone-inside p {
+  color: #94a3b8;
+}
+
+/* Active Drag State for Dark Theme */
+[data-theme="dark"] .drop-zone.drag-active .drop-zone-inside {
+  background: rgba(40, 167, 69, 0.12) !important;
+  border-color: #2ea74f;
+}
+
+/* footer */
+[data-theme="dark"] .bottom-nav-footer {
+  border-top-color: var(--border);
+}
+
+[data-theme="dark"] .footer-label {
+  color: #64748b;
+}
+
+[data-theme="dark"] .app-tag-line {
+  color: #94a3b8;
 }

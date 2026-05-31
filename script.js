@@ -41,6 +41,8 @@ async function startPassportProcess() {
         currentFiles = Array.from(fileInput.files);
         currentIndex = 0;
         document.getElementById('main-menu').style.display = 'none';
+        document.querySelector('.top-nav-header').style.display = 'none';
+        document.querySelector('.bottom-nav-footer').style.display = 'none';
         document.getElementById('cropper-ui').style.display = 'block';
         loadNextCropper();
     }
@@ -65,6 +67,8 @@ async function startProcess() {
         currentFiles = Array.from(fileInput.files);
         currentIndex = 0;
         document.getElementById('main-menu').style.display = 'none';
+        document.querySelector('.top-nav-header').style.display = 'none';
+        document.querySelector('.bottom-nav-footer').style.display = 'none';
         document.getElementById('cropper-ui').style.display = 'block';
         loadNextCropper();
     } else {
@@ -183,6 +187,8 @@ function cancelCropping() {
 
     document.getElementById('cropper-ui').style.display = 'none';
     document.getElementById('main-menu').style.display = 'grid';
+    document.querySelector('.top-nav-header').style.display = 'flex';
+    document.querySelector('.bottom-nav-footer').style.display = 'flex';
 
     document.getElementById('purpose').value = "custom";
     purposeChanges();
@@ -205,6 +211,8 @@ function finishCropping(customMessage = "All photos processed and saved.") {
     }
     document.getElementById('cropper-ui').style.display = 'none';
     document.getElementById('main-menu').style.display = 'grid';
+    document.querySelector('.top-nav-header').style.display = 'flex';
+    document.querySelector('.bottom-nav-footer').style.display = 'flex';
     document.getElementById('status').innerText = customMessage;
 
     document.getElementById('purpose').value = "custom";
@@ -253,7 +261,7 @@ function applyFilterVisibility() {
     allFilterOptions.forEach(option => {
         if (option.value === "show-more-toggle") {
             const toggleClone = option.cloneNode(true);
-            toggleClone.innerText = filtersExpanded ? "↩ Show Less Filters..." : "✨ Show More Filters...";
+            toggleClone.innerText = filtersExpanded ? "Show Less Filters..." : "Show More Filters...";
             filterSelect.appendChild(toggleClone);
         } else if (filtersExpanded || !option.classList.contains('extended-filter')) {
             filterSelect.appendChild(option.cloneNode(true));
@@ -339,17 +347,17 @@ function generatePassportPDF(images) {
     const { jsPDF } = window.jspdf;
 
     // Read requested configuration layout matrix from UI selection
-    const layoutConfig = document.getElementById('passportLayout')?.value || "5x6";
+    const layoutConfig = document.getElementById('passportLayout')?.value || "pic30";
 
     let cols = 5;
     let rows = 6;
-    let isCustom4x6Page = false;
+    let isCustom8pic = false;
 
-    if (layoutConfig === "4x2") {
+    if (layoutConfig === "pic8") {
         cols = 4;
         rows = 2;
-        isCustom4x6Page = true; // Flag to change page size to 4x6 inches
-    } else if (layoutConfig === "4x6") {
+        isCustom8pic = true; // Flag to change page size to 4 x 6 inches
+    } else if (layoutConfig === "pic24") {
         cols = 4;
         rows = 6;
     }
@@ -357,7 +365,7 @@ function generatePassportPDF(images) {
     // Define page dimensions dynamically based on layout choice
     let pageW, pageH, orientationSetting, formatSetting;
 
-    if (isCustom4x6Page) {
+    if (isCustom8pic) {
         // 4 x 6 inches in mm = 101.6mm x 152.4mm
         orientationSetting = "landscape";
         formatSetting = [101.6, 152.4];
@@ -383,9 +391,9 @@ function generatePassportPDF(images) {
 
     const maxPhotos = cols * rows;
 
-    // Adjusted gaps slightly smaller for 4x6 inch constraint fit
-    const gapX = isCustom4x6Page ? 2.0 : 4.0;
-    const gapY = (layoutConfig === "4x6") ? 2.5 : (isCustom4x6Page ? 2.0 : 4.0);
+    // Adjusted gaps slightly smaller for pic24 inch constraint fit
+    const gapX = isCustom8pic ? 2.0 : 4.0;
+    const gapY = (layoutConfig === "pic24") ? 2.5 : (isCustom8pic ? 2.0 : 4.0);
 
     const totalGridWidth = (cols * imgW) + ((cols - 1) * gapX);
     const totalGridHeight = (rows * imgH) + ((rows - 1) * gapY);
@@ -395,8 +403,8 @@ function generatePassportPDF(images) {
     let startY = (pageH - totalGridHeight) / 2;
 
     // Maintain your legacy manual override offsets only on standard A4 template modes
-    if (!isCustom4x6Page) {
-        if (layoutConfig === "4x6") {
+    if (!isCustom8pic) {
+        if (layoutConfig === "pic24") {
             // Safe centered distribution limit for 24 pictures
             if (startY < 8) startY = 8;
         }
@@ -567,6 +575,7 @@ function purposeChanges() {
     }
 }
 
+// LIVE PREVIEW
 async function updatePreview() {
     const fileInput = document.getElementById('fileInput');
     if (!fileInput || fileInput.files.length === 0) return;
@@ -617,3 +626,94 @@ if (pTextNode) pTextNode.addEventListener('input', triggerPreview);
 // Initialization
 effectChanges();
 purposeChanges();
+
+// GLOBAL WORKSPACE RESET CONTROLLER
+function resetGlobalWorkspace() {
+    // 1. Terminate active cropper engines and clean memory leak allocations
+    if (cropperInstance) {
+        cropperInstance.destroy();
+        cropperInstance = null;
+    }
+    if (window.currentCropperBlobUrl) {
+        URL.revokeObjectURL(window.currentCropperBlobUrl);
+        window.currentCropperBlobUrl = null;
+    }
+
+    // 2. Flush internal file pipeline matrices data queues
+    currentFiles = [];
+    currentIndex = 0;
+    window.passportCanvasArray = [];
+    window.isPassportWorkflow = false;
+
+    // 3. Reset standard HTML input form text fields completely
+    const fileInput = document.getElementById('fileInput');
+    if (fileInput) fileInput.value = "";
+
+    const manualWidth = document.getElementById('manualWidth');
+    const manualHeight = document.getElementById('manualHeight');
+    const polaroidText = document.getElementById('polaroidText');
+
+    if (manualWidth) manualWidth.value = "";
+    if (manualHeight) manualHeight.value = "";
+    if (polaroidText) polaroidText.value = "";
+
+    // 4. Force dropdown selector values back to factory defaults
+    if (document.getElementById('purpose')) document.getElementById('purpose').value = "custom";
+    if (document.getElementById('format')) document.getElementById('format').value = "image/png";
+    if (document.getElementById('filter')) document.getElementById('filter').value = "none";
+    if (document.getElementById('frame')) document.getElementById('frame').value = "none";
+    if (document.getElementById('passportLayout')) document.getElementById('passportLayout').value = "5x6";
+
+    // 5. Reset manual checkbox markers safely
+    const manualCropCheck = document.getElementById('manualCropCheck');
+    const passportManualCropCheck = document.getElementById('passportManualCropCheck');
+    if (manualCropCheck) manualCropCheck.checked = false;
+    if (passportManualCropCheck) passportManualCropCheck.checked = true;
+
+    // 6. Refresh UI visibility alignments panels
+    purposeChanges();
+    effectChanges();
+
+    // 7. Wipe out preview canvases rendering boxes frames
+    const previewCanvas = document.getElementById('previewCanvas');
+    if (previewCanvas) {
+        const pCtx = previewCanvas.getContext('2d');
+        pCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+    }
+
+    // 8. Reset Workspace status message logger board
+    const statusText = document.getElementById('status');
+    if (statusText) {
+        statusText.innerText = "Workspace cleared.";
+        setTimeout(() => {
+            if (statusText.innerText === "Workspace cleared.") statusText.innerText = "";
+        }, 3000);
+    }
+}
+
+const dropZone = document.getElementById('dropZoneContainer');
+const fileInput = document.getElementById('fileInput');
+
+// Trigger browse when clicking the zone
+dropZone.addEventListener('click', () => fileInput.click());
+
+// Drag effects
+['dragenter', 'dragover'].forEach(eventName => {
+    dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropZone.classList.add('drag-active');
+    }, false);
+});
+
+['dragleave', 'drop'].forEach(eventName => {
+    dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('drag-active');
+    }, false);
+});
+
+// Handle dropped files
+dropZone.addEventListener('drop', (e) => {
+    fileInput.files = e.dataTransfer.files;
+    triggerPreview(); // Fire your live preview engine instantly
+});

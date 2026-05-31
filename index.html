@@ -1,12 +1,31 @@
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Photo Editor</title>
-    <meta name="google-site-verification" content="HFdHX7Q4Y6E8mt4UqFaT8tnUZDCw8ZJZ40tHVPgFV7s" />
+    <title>Photo Editor - One Click Effects & Passport Studio</title>
+    
+    <meta name="description" content="A powerful, browser-native batch photo editor and passport studio. Crop, filter, and structure multiple assets simultaneously into professional A4 print templates completely client-side.">
+    <meta name="keywords" content="photo editor, passport photo maker, batch image processor, A4 print layout generator, cropper js web app, glassmorphism dashboard editor">
+    <meta name="author" content="Atanu Rooj">
+    <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://photoeditor.enggviz.online/">
+    
+    <meta name="google-site-verification" content="HFdHX7Q4Y6E8mt4UqFaT8tnUZDCw8ZJZ40tHVPgFV7s" />
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://photoeditor.enggviz.online/">
+    <meta property="og:title" content="Photo Editor - One Click Effects & Passport Studio">
+    <meta property="og:description" content="Crop, layer custom retro frames, and automate bulk photo conversions smoothly inside a hardware-accelerated glassmorphism panel.">
+    <meta property="og:image" content="https://photoeditor.enggviz.online/assets/preview-banner.jpg">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://photoeditor.enggviz.online/">
+    <meta name="twitter:title" content="Photo Editor - One Click Effects & Passport Studio">
+    <meta name="twitter:description" content="Automate image optimizations, print layout compositions, and custom filters client-side without data leaking.">
+    <meta name="twitter:image" content="https://photoeditor.enggviz.online/assets/preview-banner.jpg">
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -14,13 +33,21 @@
 </head>
 
 <body>
-    <div class="theme-toggle-container" style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
-        <label class="switch-layout"
-            style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600;">
-            <span>Dark Mode</span>
-            <input type="checkbox" id="themeToggleCheckbox" onchange="toggleWorkspaceTheme()"
-                style="width: auto; cursor: pointer;">
-        </label>
+    <div class="top-nav-header">
+
+        <div class="nav-spacer"></div>
+
+        <div class="nav-title-block">
+            <h1 class="app-title">Photo Editor</h1>
+        </div>
+
+        <div class="nav-toggle-block">
+            <label class="switch-layout">
+                <span>Modern Dark Mode</span>
+                <input type="checkbox" id="themeToggleCheckbox" onchange="toggleWorkspaceTheme()">
+            </label>
+        </div>
+
     </div>
 
     <div id="main-menu">
@@ -28,21 +55,26 @@
             <span class="passport-badge">OFFICIAL RATIO</span>
             <h3>Passport Studio</h3>
 
-            <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">Quickly format prints to standard 35mm x 45mm passport sizing sheets.</p>
+            <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">Quickly format to standard passport sizing
+                sheets.</p>
 
-            <hr style="border:0; border-top:1px solid #eee; margin-bottom:15px;">
+            <hr style="border:0; border-top:1px solid #eee; margin-bottom:10px;">
 
-            <div class="form-group">
+            <div class="form-group drop-zone" id="dropZoneContainer">
                 <label>Upload Single or Multiple Photos</label>
-                <input type="file" id="fileInput" multiple accept="image/*">
+                <div class="drop-zone-inside">
+                    <span class="drop-icon">📁</span>
+                    <p>Drag & drop images here or <strong>Browse</strong></p>
+                    <input type="file" id="fileInput" multiple accept="image/*" style="display:none;">
+                </div>
             </div>
 
             <div class="form-group">
                 <label>Paper Size</label>
                 <select id="passportLayout">
-                    <option value="5x6" selected>A4 (30 Photos)</option>
-                    <option value="4x2">4 x 6 inch (8 Photos)</option>
-                    <option value="4x6">A4 (24 Photos)</option>
+                    <option value="pic30" selected>A4 (30 Photos)</option>
+                    <option value="pic8">4 x 6 inch (8 Photos)</option>
+                    <option value="pic24">A4 (24 Photos)</option>
                 </select>
             </div>
 
@@ -58,7 +90,7 @@
         </div>
 
         <div class="ui-col" id="controls-column">
-            <h2>Photo Editor Control Panel</h2>
+            <h2>Control Panel</h2>
 
             <div class="dimension-grid" id="purpose-format-params">
                 <div class="form-group">
@@ -91,7 +123,7 @@
                         <option value="noir">Noir</option>
                         <option value="lomo">Lomo</option>
 
-                        <option value="show-more-toggle" id="inlineToggleOption">✨ Show More Filters...</option>
+                        <option value="show-more-toggle" id="inlineToggleOption">Show More Filters...</option>
 
                         <option value="coldbrew" class="extended-filter">Cold Brew</option>
                         <option value="dreamy" class="extended-filter">Dreamy Aesthetic</option>
@@ -157,7 +189,12 @@
                 <label for="manualCropCheck" style="margin:0; cursor:pointer; flex-grow:1;"> Manual Crop </label>
             </div>
 
-            <button onclick="startProcess()">Start Processing Batch</button>
+            <div class="action-button-row"
+                style="display: grid; grid-template-columns: 3fr 1fr; gap: 10px; margin-top: 15px; margin-bottom: 10px;">
+                <button onclick="startProcess()" style="margin: 0;">Start Processing</button>
+                <button onclick="resetGlobalWorkspace()" class="btn-reset" title="Reset All Settings"
+                    style="margin: 0; background: #64748b;">Reset</button>
+            </div>
 
 
             <div class="instruction-header">
@@ -166,14 +203,17 @@
 
             <div class="tip-card">
                 <span class="tip-badge webp-badge">WebP</span>
-                <p><strong>Recommended Format:</strong> High fidelity at exceptionally small file sizes. Perfect for
-                    rapid sharing.</p>
+                <p><strong>exceptionally small</strong> file sizes.</p>
             </div>
 
             <div class="tip-card">
                 <span class="tip-badge batch-badge">Batch</span>
-                <p><strong>Bulk Automations:</strong> Leave <em>Manual Crop</em> unchecked to automatically process
-                    large asset lists in a single click.</p>
+                <p><strong>Bulk Automations:</strong> Automatically process large asset lists in a single click.</p>
+            </div>
+
+            <div class="tip-card">
+                <span class="tip-badge effects-badge">Effects</span>
+                <p><strong>Apply Effects:</strong> Quickly add stunning effects to your photos with a single click.</p>
             </div>
 
         </div>
@@ -181,8 +221,9 @@
         <div class="ui-col" id="preview-column">
             <h3>Live Composition</h3>
 
-            <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">Real-time graphics preview window before rendering outputs.</p>
-            <hr style="border:0; border-top:1px solid #eee; margin-bottom:15px;">
+            <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">
+                Real-time graphics preview window before rendering outputs.
+            </p>
 
             <div id="preview-section" style="text-align: center;">
                 <div class="preview-box">
@@ -192,7 +233,7 @@
 
             <div class="recipes-panel">
                 <h3>Presets & Creative Recipes</h3>
-                
+
                 <div class="combos-grid">
                     <div class="combo-pill">
                         <span class="combo-tag tag-aesthetic">Aesthetic</span>
@@ -216,6 +257,28 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <div class="bottom-nav-footer">
+
+        <div class="footer-author-block">
+            <p class="footer-label">Author</p>
+            <h3 class="footer-highlight">Atanu Rooj</h3>
+        </div>
+
+        <div class="footer-tagline-block">
+            <p class="footer-tag-line">Personal use photo editor webplatform</p>
+            <p class="footer-copy-right">© 2026 Atanu Rooj. All rights reserved.</p>
+        </div>
+
+        <div class="footer-contact-block">
+            <p class="footer-label">Connect with me</p>
+            <div class="footer-links">
+                <a href="https://github.com/TheOneWhoCreate" target="_blank" class="footer-link">GitHub</a>
+                <a href="https://www.linkedin.com/in/atanu-rooj" target="_blank" class="footer-link">LinkedIn</a>
+            </div>
+        </div>
+
     </div>
 
     <div id="cropper-ui">
