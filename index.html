@@ -1,36 +1,11 @@
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Photo Editor - Instant Effects & Passport Studio</title>
-
-    <meta name="description"
-        content="A powerful, browser-native batch photo editor and passport studio. Crop, filter, and structure multiple assets simultaneously into professional A4 print templates.">
-    <meta name="keywords"
-        content="photo editor, passport photo maker, batch image processor, A4 print layout generator, cropper js web app, glassmorphism dashboard editor">
-    <meta name="author" content="Atanu Rooj">
-    <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://ieps.enggviz.online/">
-
-    <meta name="google-site-verification" content="HFdHX7Q4Y6E8mt4UqFaT8tnUZDCw8ZJZ40tHVPgFV7s" />
-
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://ieps.enggviz.online/">
-    <meta property="og:title" content="Photo Editor - Instant Effects & Passport Studio">
-    <meta property="og:description"
-        content="Apply instant effects and automate bulk photo conversions smoothly inside a hardware-accelerated glassmorphism panel.">
-    <meta property="og:image" content="https://ieps.enggviz.online//assets/preview-banner.jpg">
-
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="https://ieps.enggviz.online/">
-    <meta name="twitter:title" content="Photo Editor - Instant Effects & Passport Studio">
-    <meta name="twitter:description"
-        content="Automate image optimizations, print layout compositions, and custom filters client-side without data leaking.">
-    <meta name="twitter:image" content="https://ieps.enggviz.online/assets/preview-banner.jpg">
-
+    <title>IE&PS - Instant Effects & Passport Studio</title>
+    <meta name="description" content="A powerful, browser-native batch photo editor and passport studio.">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="style.css" />
@@ -38,259 +13,284 @@
 
 <body>
     <div class="top-nav-header">
-
-        <div class="nav-spacer"></div>
-
-        <div class="nav-title-block">
-            <h1 class="app-title">Photo Editor</h1>
-        </div>
-
-        <div class="nav-toggle-block">
-            <label class="switch-layout">
-                <span>Modern Dark Mode</span>
-                <input type="checkbox" id="themeToggleCheckbox" onchange="toggleWorkspaceTheme()">
-            </label>
-        </div>
-
-    </div>
-
-    <div id="main-menu">
-        <div class="ui-col" id="passport-column">
-            <span class="passport-badge">OFFICIAL RATIO</span>
-            <h3>Passport Studio</h3>
-
-            <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">Quickly format to standard passport sizing
-                sheets.</p>
-
-            <hr style="border:0; border-top:1px solid #eee; margin-bottom:10px;">
-
-            <div class="form-group drop-zone" id="dropZoneContainer">
-                <label>Upload Single or Multiple Photos</label>
-                <div class="drop-zone-inside">
-                    <span class="drop-icon">📁</span>
-                    <p>Drag & drop images here or <strong>Browse</strong></p>
-                    <input type="file" id="fileInput" multiple accept="image/*" style="display:none;">
-                </div>
+        <div class="title-bar">
+            <div class="nav-title-block">
+                <h1 class="app-title">IE&PS</h1>
+                <span class="app-subtitle">Instant Effects & Passport Studio</span>
             </div>
 
-            <div class="form-group">
-                <label>Paper Size</label>
-                <select id="passportLayout">
-                    <option value="pic30" selected>A4 (30 Photos)</option>
-                    <option value="pic8">4 x 6 inch (8 Photos)</option>
-                    <option value="pic24">A4 (24 Photos)</option>
-                </select>
-            </div>
-
-            <div class="checkbox-container">
-                <input type="checkbox" id="passportManualCropCheck" checked>
-                <label for="passportManualCropCheck" style="margin:0; cursor:pointer; flex-grow:1;">
-                    Manual Crop (Passport)
+            <div class="title-bar-actions">
+                <label class="switch-layout">
+                    <span>Dark Mode</span>
+                    <input type="checkbox" id="themeToggleCheckbox" onchange="toggleWorkspaceTheme()">
                 </label>
             </div>
-
-            <button class="btn-passport" onclick="startPassportProcess()">Build Passport Sheet</button>
-            <div id="status" style="margin-top: 10px; font-size: 0.85rem;"></div>
         </div>
 
-        <div class="ui-col" id="controls-column">
-            <h2>Control Panel</h2>
-
-            <div class="dimension-grid" id="purpose-format-params">
-                <div class="form-group">
-                    <label>Posting To:</label>
-                    <select id="purpose">
-                        <option value="custom">Custom</option>
-                        <option value="insta-feed (3:4)">Instagram Feed (3:4)</option>
-                        <option value="insta-feed (4:5)">Instagram Feed (4:5)</option>
-                        <option value="insta-square">Instagram Square (1:1)</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Save Format</label>
-                    <select id="format">
-                        <option value="image/webp">WebP</option>
-                        <option value="image/jpeg">JPEG</option>
-                        <option value="image/png" selected>PNG</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="dimension-grid" id="effect-params">
-                <div class="form-group">
-                    <label>Filter Profile</label>
-                    <select id="filter" onchange="handleFilterDropdownChange(this)">
-                        <option value="none">None</option>
-                        <option value="goldenHour">Golden Hour</option>
-                        <option value="sepia">Sepia</option>
-                        <option value="noir">Noir</option>
-                        <option value="lomo">Lomo</option>
-
-                        <option value="show-more-toggle" id="inlineToggleOption">Show More Filters...</option>
-
-                        <option value="coldbrew" class="extended-filter">Cold Brew</option>
-                        <option value="dreamy" class="extended-filter">Dreamy Aesthetic</option>
-                        <option value="cyberpunk" class="extended-filter">Cyberpunk</option>
-                        <option value="duotone" class="extended-filter">Duotone</option>
-                        <option value="brownie" class="extended-filter">Brownie</option>
-                        <option value="vintage" class="extended-filter">Vintage Retro</option>
-                        <option value="matcha" class="extended-filter">Matcha Latte</option>
-                        <option value="midnight" class="extended-filter">Midnight Vibe</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Frame Style</label>
-                    <select id="frame">
-                        <option value="none">None</option>
-                        <option value="polaroid">Polaroid</option>
-                        <option value="glassFrame">Glass Morphism</option>
-                        <option value="filmStrip">Film Strip</option>
-                        <option value="gallery">Museum Gallery</option>
-                        <option value="blurBg">Blur Background</option>
-                        <option value="magazine">Magazine</option>
-                        <option value="border">Border</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="dimension-grid" id="dimension-params">
-                <div class="form-group">
-                    <label>Width (Optional)</label>
-                    <input type="number" id="manualWidth" placeholder="Auto (Pixels)" min="1">
-                </div>
-
-                <div class="form-group">
-                    <label>Height (Optional)</label>
-                    <input type="number" id="manualHeight" placeholder="Auto (Pixels)" min="1">
-                </div>
-            </div>
-
-            <div class="form-group" id="color-pad-params">
-                <div id="colorlabel">
-                    Frame/Background Color
-                    <span id="color-disclaimer"
-                        style="color: #d93025; font-size: 0.8rem; margin-left: 10px; display: none;">
-                        * White works best for Polaroid
-                    </span>
-                </div>
-
-                <div class="color-pad-row">
-                    <input type="color" id="frameColor" value="#ffffff">
-                    <input type="number" id="paddingInput" placeholder="Padding px">
-                </div>
-            </div>
-
-            <div class="form-group" id="caption-params">
-                <label id="caption" style="display: none;">Polaroid Caption (Optional)</label>
-                <input type="text" id="polaroidText" placeholder="Enter caption..." style="display: none;"
-                    class="standard-input">
-            </div>
-
-            <div class="checkbox-container">
-                <input type="checkbox" id="manualCropCheck">
-                <label for="manualCropCheck" style="margin:0; cursor:pointer; flex-grow:1;"> Manual Crop </label>
-            </div>
-
-            <div class="action-button-row"
-                style="display: grid; grid-template-columns: 3fr 1fr; gap: 10px; margin-top: 15px; margin-bottom: 10px;">
-                <button onclick="startProcess()" style="margin: 0;">Start Processing</button>
-                <button onclick="resetGlobalWorkspace()" class="btn-reset" title="Reset All Settings"
-                    style="margin: 0; background: #64748b;">Reset</button>
-            </div>
-
-
-            <div class="instruction-header">
-                <h3>Workspace Tips</h3>
-            </div>
-
-            <div class="tip-card">
-                <span class="tip-badge webp-badge">WebP</span>
-                <p><strong>exceptionally small</strong> file sizes.</p>
-            </div>
-
-            <div class="tip-card">
-                <span class="tip-badge batch-badge">Batch</span>
-                <p><strong>Bulk Automations:</strong> Automatically process large asset lists in a single click.</p>
-            </div>
-
-            <div class="tip-card">
-                <span class="tip-badge effects-badge">Effects</span>
-                <p><strong>Apply Effects:</strong> Quickly add stunning effects to your photos with a single click.</p>
-            </div>
-
-        </div>
-
-        <div class="ui-col" id="preview-column">
-            <h3>Live Composition</h3>
-
-            <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">
-                Real-time graphics preview window before rendering outputs.
-            </p>
-
-            <div id="preview-section" style="text-align: center;">
-                <div class="preview-box">
-                    <canvas id="previewCanvas"></canvas>
-                </div>
-            </div>
-
-            <div class="recipes-panel">
-                <h3>Presets & Creative Recipes</h3>
-
-                <div class="combos-grid">
-                    <div class="combo-pill">
-                        <span class="combo-tag tag-aesthetic">Aesthetic</span>
-                        <p>Dreamy + Polaroid <em>(Custom texts)</em></p>
-                    </div>
-
-                    <div class="combo-pill">
-                        <span class="combo-tag tag-retro">Analog</span>
-                        <p>Sepia + Film Strip <em>(90s cinema vibe)</em></p>
-                    </div>
-
-                    <div class="combo-pill">
-                        <span class="combo-tag tag-modern">Gallery</span>
-                        <p>Noir + Museum Gallery <em>(Artistic portraits)</em></p>
-                    </div>
-
-                    <div class="combo-pill">
-                        <span class="combo-tag tag-cyber">Neon</span>
-                        <p>Cyberpunk + Glass Morphism <em>(Night shots)</em></p>
-                    </div>
-                </div>
+        <div class="sub-nav-bar">
+            <div class="nav-tabs" id="navTabs">
+                <button class="tab-btn active" onclick="switchTab('photo-tab', this)">Photo Studio</button>
+                <button class="tab-btn" onclick="switchTab('passport-tab', this)">Passport Studio</button>
             </div>
         </div>
     </div>
 
-    <div class="bottom-nav-footer">
+    <div id="main-content-box">
 
-        <div class="footer-author-block">
-            <p class="footer-label">Author</p>
-            <h3 class="footer-highlight">Atanu Rooj</h3>
-        </div>
+        <div id="photo-tab" class="tab-section active-tab">
+            <div class="ui-grid-2">
+                <div class="ui-col" id="controls-column">
+                    <h2>Control Panel</h2>
+                    <div class="form-group drop-zone" id="dropZoneContainer">
+                        <label>Upload Single or Multiple Photos</label>
+                        <div class="drop-zone-inside">
+                            <span class="drop-icon">📁</span>
+                            <p>Drag & drop images here or <strong>Browse</strong></p>
+                            <input type="file" id="fileInput" multiple accept="image/*" style="display:none;">
+                        </div>
+                    </div>
+                    <div class="upload-counter-badge" id="uploadQueue" style="display:none;">
+                        <span id="queue-counter-total">0</span> photos selected for processing
+                    </div>
 
-        <div class="footer-tagline-block">
-            <p class="footer-tag-line">Personal use photo editor webplatform</p>
-            <p class="footer-copy-right">© 2026 Atanu Rooj. All rights reserved.</p>
-        </div>
+                    <div class="dimension-grid" id="purpose-format-params">
+                        <div class="form-group">
+                            <label>Posting To:</label>
+                            <select id="purpose">
+                                <option value="custom">Custom</option>
+                                <option value="insta-feed (3:4)">Instagram Feed (3:4)</option>
+                                <option value="insta-feed (4:5)">Instagram Feed (4:5)</option>
+                                <option value="insta-square">Instagram Square (1:1)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Save Format</label>
+                            <select id="format">
+                                <option value="image/webp">WebP</option>
+                                <option value="image/jpeg">JPEG</option>
+                                <option value="image/png" selected>PNG</option>
+                            </select>
+                        </div>
+                    </div>
 
-        <div class="footer-contact-block">
-            <p class="footer-label">Connect with me</p>
-            <div class="footer-links">
-                <a href="https://github.com/TheOneWhoCreate" target="_blank" class="footer-link">GitHub</a>
-                <a href="https://www.linkedin.com/in/atanu-rooj" target="_blank" class="footer-link">LinkedIn</a>
+                    <div class="dimension-grid" id="effect-params">
+                        <div class="form-group">
+                            <label>Filter Profile</label>
+                            <select id="filter" onchange="handleFilterDropdownChange(this)">
+                                <option value="none">None</option>
+                                <option value="cinematic">Cinematic Teal & Orange</option>
+                                <option value="goldenHour">Golden Hour</option>
+                                <option value="sepia">Sepia</option>
+                                <option value="noir">Noir</option>
+                                <option value="lomo">Lomo</option>
+                                <option value="show-more-toggle" id="inlineToggleOption">Show More Filters...</option>
+                                <option value="coldbrew" class="extended-filter">Cold Brew</option>
+                                <option value="dreamy" class="extended-filter">Dreamy Aesthetic</option>
+                                <option value="cyberpunk" class="extended-filter">Cyberpunk</option>
+                                <option value="duotone" class="extended-filter">Duotone</option>
+                                <option value="brownie" class="extended-filter">Brownie</option>
+                                <option value="vintage" class="extended-filter">Vintage Retro</option>
+                                <option value="matcha" class="extended-filter">Matcha Latte</option>
+                                <option value="midnight" class="extended-filter">Midnight Vibe</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Frame Style</label>
+                            <select id="frame">
+                                <option value="none">None</option>
+                                <option value="polaroid">Polaroid</option>
+                                <option value="glassFrame">Glass Morphism</option>
+                                <option value="filmStrip">Film Strip</option>
+                                <option value="gallery">Museum Gallery</option>
+                                <option value="blurBg">Blur Background</option>
+                                <option value="magazine">Magazine</option>
+                                <option value="postageStamp">Postage Stamp</option>
+                                <option value="artMount">Art Print Mount</option>
+                                <option value="neonGlow">Neon Glow Border</option>
+                                <option value="postcard">Vintage Postcard</option>
+                                <option value="border">Border</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="dimension-grid" id="dimension-params">
+                        <div class="form-group">
+                            <label>Width (Optional)</label>
+                            <input type="number" id="manualWidth" placeholder="Auto (Pixels)" min="1">
+                        </div>
+                        <div class="form-group">
+                            <label>Height (Optional)</label>
+                            <input type="number" id="manualHeight" placeholder="Auto (Pixels)" min="1">
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="color-pad-params">
+                        <div id="colorlabel">
+                            Frame/Background Color
+                            <span id="color-disclaimer"
+                                style="color: #d93025; font-size: 0.8rem; margin-left: 10px; display: none;">
+                                * White works best for Polaroid
+                            </span>
+                        </div>
+                        <div class="color-pad-row">
+                            <input type="color" id="frameColor" value="#ffffff">
+                            <input type="number" id="paddingInput" placeholder="Padding px">
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="caption-params">
+                        <label id="caption" style="display: none;">Polaroid Caption (Optional)</label>
+                        <input type="text" id="polaroidText" placeholder="Enter caption..." style="display: none;"
+                            class="standard-input">
+                    </div>
+
+                    <div class="form-group" id="watermark-params">
+                        <label>Watermark Text Overlay (Optional)</label>
+                        <input type="text" id="watermarkText" placeholder="Enter signature or watermark text..." class="standard-input" style="margin-bottom: 8px;">
+                        <div class="dimension-grid">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label style="font-size: 0.8rem;">Placement</label>
+                                <select id="watermarkPlacement" style="padding: 8px; font-size: 0.9rem;">
+                                    <option value="bottom-right" selected>Bottom Right</option>
+                                    <option value="bottom-left">Bottom Left</option>
+                                    <option value="top-right">Top Right</option>
+                                    <option value="top-left">Top Left</option>
+                                    <option value="center">Center</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label style="font-size: 0.8rem;">Opacity</label>
+                                <input type="range" id="watermarkOpacity" min="0.1" max="1.0" step="0.1" value="0.4" style="width: 100%; height: 38px; cursor: pointer; margin: 0; padding: 0;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="manualCropCheck">
+                        <label for="manualCropCheck" style="margin:0; cursor:pointer; flex-grow:1;"> Manual Crop
+                        </label>
+                    </div>
+
+                    <div class="action-button-row"
+                        style="display: grid; grid-template-columns: 3fr 1fr; gap: 10px; margin-top: 15px; margin-bottom: 10px;">
+                        <button onclick="startProcess()" style="margin: 0;">Start Processing</button>
+                        <button onclick="resetGlobalWorkspace()" class="btn-reset" title="Reset All Settings"
+                            style="margin: 0; background: #64748b;">Reset</button>
+                    </div>
+                    <div id="status" style="margin-top: 10px; font-size: 0.85rem;"></div>
+                </div>
+
+                <div class="ui-col" id="preview-column">
+                    <h3>Live Composition</h3>
+                    <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">Real-time graphics preview window
+                        before rendering outputs.</p>
+                    <div id="preview-section" style="text-align: center;">
+                        <div class="preview-box">
+                            <canvas id="previewCanvas"></canvas>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
+        <div id="passport-tab" class="tab-section" style="display: none;">
+            <div class="ui-grid-2">
+                <div class="ui-col" id="passport-controls-column">
+                    <span class="passport-badge">OFFICIAL RATIO</span>
+                    <h2>Passport Studio</h2>
+                    <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">Quickly format to standard passport sizing sheets.</p>
+                    <hr style="border:0; border-top:1px solid #eee; margin-bottom:10px;">
+
+                    <div class="form-group drop-zone" id="passportDropZoneContainer">
+                        <label>Upload Single or Multiple Photos</label>
+                        <div class="drop-zone-inside">
+                            <span class="drop-icon">📁</span>
+                            <p>Drag & drop images here or <strong>Browse</strong></p>
+                            <input type="file" id="passportFileInput" multiple accept="image/*" style="display:none;">
+                        </div>
+                    </div>
+                    <div class="upload-counter-badge" id="passportUploadQueue" style="display:none;">
+                        <span id="passport-queue-counter-total">0</span> photos selected for processing
+                    </div>
+
+                    <div id="passport-quantity-settings" style="display:none; margin-bottom: 15px;">
+                        <label style="margin-bottom: 8px;">Print Quantity per Photo</label>
+                        <div id="passport-quantity-list" class="quantity-list-container">
+                            <!-- Populated dynamically by JS -->
+                        </div>
+                    </div>
+
+                    <div class="dimension-grid" id="passport-dimension-params">
+                        <div class="form-group">
+                            <label>Paper Size</label>
+                            <select id="passportLayout">
+                                <option value="pic30" selected>A4 (30 Photos)</option>
+                                <option value="pic8">4 x 6 inch (8 Photos)</option>
+                                <option value="pic24">A4 (24 Photos)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Format</label>
+                            <select id="passportExportFormat">
+                                <option value="application/pdf" selected>PDF</option>
+                                <option value="image/webp">WebP</option>
+                                <option value="image/png">PNG</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="passportManualCropCheck" checked>
+                        <label for="passportManualCropCheck" style="margin:0; cursor:pointer; flex-grow:1;">Manual Crop (Passport)</label>
+                    </div>
+
+                    <div class="action-button-row"
+                        style="display: grid; grid-template-columns: 3fr 1fr; gap: 10px; margin-top: 15px; margin-bottom: 10px;">
+                        <button class="btn-passport" onclick="startPassportProcess()" style="margin: 0;">Build Passport Sheet</button>
+                        <button onclick="resetPassportWorkspace()" class="btn-reset" title="Reset Passport Settings"
+                            style="margin: 0; background: #64748b;">Reset</button>
+                    </div>
+                    <div id="passportStatus"
+                        style="margin-top: 10px; font-size: 0.85rem; font-weight: bold; color: var(--primary); text-align: center;">
+                    </div>
+                </div>
+
+                <div class="ui-col" id="passport-preview-column">
+                    <h3>Live Composition (Passport)</h3>
+                    <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">Real-time graphics preview window before rendering outputs.</p>
+                    <div id="passport-preview-section" style="text-align: center;">
+                        <div class="preview-box">
+                            <canvas id="passportPreviewCanvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div id="cropper-ui">
         <h2 id="crop-counter">Photo 1 of 1</h2>
         <p>Adjust your crop below. The selected effect will be applied automatically upon saving.</p>
-
         <div class="crop-container">
             <img id="crop-image" src="" alt="To Crop">
+        </div>
+
+        <div class="cropper-toolbar" style="margin-top: 15px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px; align-items: center;">
+            <div class="cropper-controls" style="display: flex; gap: 10px; justify-content: center; width: 100%;">
+                <button onclick="rotateCropper(-90)" class="btn-secondary" style="width: auto; margin: 0; padding: 10px 18px; font-size: 0.9rem;">↺ Rotate Left</button>
+                <button onclick="rotateCropper(90)" class="btn-secondary" style="width: auto; margin: 0; padding: 10px 18px; font-size: 0.9rem;">Rotate Right ↻</button>
+            </div>
+            <div class="cropper-aspect-controls" style="display: flex; gap: 10px; align-items: center; justify-content: center; width: 100%;">
+                <label style="margin: 0; font-size: 0.9rem; font-weight: bold;">Aspect Ratio:</label>
+                <select id="cropperRatioSelect" onchange="changeCropperRatio(this.value)" style="width: auto; padding: 8px 12px; margin: 0; background: #fff; border: 1.5px solid var(--border); border-radius: 8px;">
+                    <option value="free">Freeform</option>
+                    <option value="1:1">Square (1:1)</option>
+                    <option value="3:4">Portrait (3:4)</option>
+                    <option value="4:5">Portrait (4:5)</option>
+                    <option value="16:9">Landscape (16:9)</option>
+                    <option value="4:3">Landscape (4:3)</option>
+                </select>
+            </div>
         </div>
 
         <button onclick="saveCropAndNext()">Save & Next</button>
@@ -301,6 +301,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script src="script.js"></script>
     <script src="effect.js"></script>
+    <script src="passport.js"></script>
 </body>
 
 </html>
